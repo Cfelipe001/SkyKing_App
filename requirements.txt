@@ -1,0 +1,56 @@
+# ======================================
+# SKYKING - DEPENDENCIAS DEL PROYECTO
+# ======================================
+
+# Framework Web
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Flask Extensions
+Flask-CORS==4.0.0
+Flask-SocketIO==5.3.5
+
+# SocketIO
+python-socketio==5.10.0
+python-engineio==4.8.0
+
+# Base de Datos PostgreSQL
+psycopg2-binary==2.9.9
+
+# Seguridad y Encriptación
+cryptography==41.0.7
+
+# Cliente HTTP para Azure IoT
+requests==2.31.0
+
+# Manejo de Eventos y Threading
+eventlet==0.33.3
+
+# Utilidades
+python-dotenv==1.0.0
+
+# Fecha y Hora (usualmente viene con Python, pero por si acaso)
+pytz==2023.3
+
+# Procesamiento de Imágenes (si lo necesitas)
+Pillow==10.1.0
+
+# ======================================
+# DEPENDENCIAS OPCIONALES/DESARROLLO
+# ======================================
+
+# Testing (opcional)
+# pytest==7.4.3
+# pytest-flask==1.3.0
+
+# Linting (opcional)
+# flake8==6.1.0
+# pylint==3.0.3
+
+# ======================================
+# NOTAS:
+# ======================================
+# - Instalar con: pip install -r requirements.txt
+# - Para desarrollo: pip install -r requirements.txt
+# - Asegúrate de tener PostgreSQL instalado y configurado
+# - Azure IoT Central requiere conexión a internet

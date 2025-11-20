@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Usuario - Admin Skyking{% endblock %}
+
+{% block head_extra %}
+    {# Copia los estilos de .admin-form-card etc. de register_new_user_form.html si los necesitas aquí #}
+    <style>
+        .admin-form-card { background-color: #1E1E1E; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width:100%; max-width: 600px; margin: 20px auto; }
+        .admin-form-card .form-group { margin-bottom: 18px; text-align: left; }
+        .admin-form-card .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; }
+        .admin-form-card .form-group input, 
+        .admin-form-card .form-group select { 
+            width: 100%; padding: 12px; border: 1px solid #444; 
+            border-radius: 4px; box-sizing: border-box; 
+            background-color: #2A2A2A; color: #E0E0E0; font-size: 1em; 
+        }
+        .admin-form-card .form-group input:focus, 
+        .admin-form-card .form-group select:focus { 
+            outline: none; border-color: #00D9C0; 
+            box-shadow: 0 0 0 0.2rem rgba(0,217,192,.25); 
+        }
+        .admin-form-card .btn-submit-admin { 
+            background-color: #00D9C0; color: #121212; border:none; 
+            padding: 12px 30px; font-weight: 600; border-radius:25px;
+            cursor: pointer; transition: background-color 0.3s ease;
+        }
+        .admin-form-card .btn-submit-admin:hover { background-color: #00bfa5; }
+        .page-padding { padding-top: 30px; padding-bottom: 50px; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <a href="{{ url_for('admin.manage_users_list') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver a Lista de Usuarios</a>
+
+    <h1>Editar Usuario: {{ user.email | default('Desconocido') }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid  border_color ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-form-card">
+        <form method="POST" action="{{ url_for('admin.edit_user_by_admin', user_id=user_id) }}">
+
+            <div class="form-group">
+                <label for="full_name">Nombre Completo:</label>
+                <input type="text" id="full_name" name="full_name" value="{{ user.get('full_name', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" value="{{ user.get('email', '') }}" required>
+            </div>
+
+            {# No incluimos campos de contraseña aquí para simplificar; el cambio de contraseña es un proceso diferente #}
+            {# Si quieres permitirlo, necesitarías campos "Nueva Contraseña" y "Confirmar Nueva Contraseña" #}
+            {# y lógica para hashear y actualizar solo si se proporciona una nueva contraseña. #}
+            <p style="font-size:0.9em; color:#A0A0A0; margin-bottom:15px;">Para cambiar la contraseña, utiliza una función separada de "restablecer contraseña" (aún no implementada).</p>
+
+
+            <div class="form-group">
+                <label for="role">Rol del Usuario:</label>
+                <select id="role" name="role" required>
+                    {# Usamos 'current_role' que pasamos desde la ruta para la opción seleccionada #}
+                    {# O si user ya tiene el rol correcto, usamos user.get('role') #}
+                    {% set current_user_role = user.get('role', current_role) %}
+                    <option value="user" {% if current_user_role == 'user' %}selected{% endif %}>Cliente</option>
+                    <option value="delivery_person_moto" {% if current_user_role == 'delivery_person_moto' %}selected{% endif %}>Operador Motocicleta</option>
+                    <option value="delivery_person_bici" {% if current_user_role == 'delivery_person_bici' %}selected{% endif %}>Operador Bicicleta</option>
+                    <option value="restaurant_owner" {% if current_user_role == 'restaurant_owner' %}selected{% endif %}>Dueño de Restaurante</option>
+                    <option value="admin" {% if current_user_role == 'admin' %}selected{% endif %}>Administrador</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="phone_number">Número de Teléfono:</label>
+                <input type="tel" id="phone_number" name="phone_number" value="{{ user.get('phone_number', '') }}">
+            </div>
+
+            <button type="submit" class="btn-submit-admin">
+                Guardar Cambios
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

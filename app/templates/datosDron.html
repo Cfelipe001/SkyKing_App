@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Dron - SkyKing (Depurado)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@3.3.1/dist/date_fns.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .main-container { /* Contenedor principal */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .charts-row { /* Fila para las 3 gráficas */
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .charts-row .chart-container { /* Cada gráfica en la fila */
+            flex: 1; /* Ocupan espacio igual */
+            min-width: 0; /* Permite encogerse */
+        }
+        .charts-grid { /* Grid para el resto */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .chart-container { /* Estilo de cada caja de gráfica */
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container canvas { /* El lienzo de la gráfica */
+            flex-grow: 1;
+            max-height: 300px; /* Ajusta según necesites */
+            min-height: 200px; /* Ajusta según necesites */
+        }
+        .map-container { /* Contenedor del mapa */
+            height: 450px; /* O ajusta según necesites */
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #map {
+             height: calc(100% - 40px); /* Asegura que el mapa use el espacio restante en su contenedor */
+             width: 100%;
+        }
+        h2 { /* Títulos de sección */
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .status { /* Paneles de estado arriba */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: space-around; /* Distribuye mejor */
+        }
+        .status-item {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            flex: 1; /* Crecen igual */
+            min-width: 120px; /* Ancho mínimo */
+        }
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        .connected {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .disconnected {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .dron-icon i { /* Estilo para el icono del dron en el mapa */
+            color: red;
+            font-size: 24px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Monitor de Dron - SkyKing</h1>
+        <p>Datos en tiempo real del vuelo</p>
+    </div>
+
+    <div id="connectionStatus" class="connection-status disconnected">
+        <i class="fas fa-plug"></i> Desconectado
+    </div>
+
+    <div class="status">
+        <div class="status-item">
+            <div><i class="fas fa-arrows-alt-v"></i> Altura</div>
+            <div class="status-value" id="AlturaDron-value">-- m</div>
+        </div>
+        <div class="status-item">
+            <div><i class="fas fa-battery-half"></i> Batería</div>
+            <div class="status-value" id="BaterA-value">-- %</div>
+        </div>
+        <div class="status-item">
+            <div><i class="fas fa-tachometer-alt"></i> Velocidad</div>
+            <div class="status-value" id="Velocidad-value">-- km/h</div>
+        </div>
+        <div class="status-item">
+            <div><i class="fas fa-cogs"></i> RPM</div>
+            <div class="status-value" id="RPM-value">--</div>
+        </div>
+         <div class="status-item">
+            <div><i class="fas fa-thermometer-half"></i> Temp. Motor 1</div>
+            <div class="status-value" id="Temperatura_Motor1-value">-- °C</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="charts-row">
+            <div class="chart-container">
+                <h2>Altura del Dron</h2>
+                <canvas id="alturaChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Batería</h2>
+                <canvas id="bateriaChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>RPM del Motor</h2>
+                <canvas id="rpmChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+             <div class="chart-container">
+                <h2>Aceleración</h2>
+                <canvas id="aceleracionChart"></canvas>
+             </div>
+             <div class="chart-container">
+                <h2>Velocidad</h2>
+                <canvas id="velocidadChart"></canvas>
+             </div>
+             <div class="chart-container">
+                <h2>Temperatura Motores</h2>
+                <canvas id="temperaturaChart"></canvas>
+             </div>
+        </div>
+
+        <div class="map-container">
+            <h2>Posición del Dron</h2>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        // Diccionario para guardar las instancias de los gráficos por nombre de telemetría
+        const charts = {};
+        let map, dronMarker;
+
+        // Configuración base para los gráficos, modificada para usar eje de tiempo
+        const chartConfigBase = {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time', 
+                        time: {
+                            unit: 'second', 
+                            displayFormats: {
+                                second: 'HH:mm:ss', 
+                                minute: 'HH:mm',
+                                hour: 'HH:mm'
+                            },
+                            tooltipFormat: 'yyyy-MM-dd HH:mm:ss'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tiempo'
+                        },
+                        ticks: {
+                            source: 'auto' 
+                        }
+                    },
+                    y: {
+                        beginAtZero: false, 
+                        title: {
+                            display: true,
+                            text: 'Valor'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 100 
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index' 
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                if (tooltipItems.length > 0 && tooltipItems[0].parsed && tooltipItems[0].parsed.x) {
+                                    const date = new Date(tooltipItems[0].parsed.x);
+                                    return date.toISOString().replace('T', ' ').slice(0, 19); 
+                                }
+                                return '';
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                                    label += context.parsed.y.toFixed(2); 
+                                } else {
+                                    label += 'N/A'; 
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 0, 
+                        hitRadius: 5, 
+                        hoverRadius: 5 
+                    }
+                }
+            }
+        };
+
+        // --- Inicializar gráficos (MODIFICADO) ---
+        function inicializarGraficos() {
+            console.log("[Init] Inicializando gráficos...");
+
+            const createChart = (elementId, label, borderColor, backgroundColor, fill = false, borderWidth = 2) => {
+                const ctx = document.getElementById(elementId);
+                if (!ctx) {
+                    console.error(`[Init Error] Elemento canvas con id '${elementId}' no encontrado.`);
+                    return null;
+                }
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: label,
+                            data: [], 
+                            borderColor: borderColor,
+                            backgroundColor: backgroundColor,
+                            tension: 0.1,
+                            fill: fill,
+                            borderWidth: borderWidth,
+                            pointRadius: 0 
+                        }]
+                    },
+                    options: chartConfigBase.options 
+                });
+                return chart;
+            };
+
+            const createTemperaturaChart = (elementId) => {
+                const ctx = document.getElementById(elementId);
+                if (!ctx) {
+                    console.error(`[Init Error] Elemento canvas con id '${elementId}' no encontrado.`);
+                    return null;
+                }
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            { label: 'Motor 1', data: [], borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.1)', tension: 0.1, borderWidth: 2, pointRadius: 0, _telemetryName: 'Temperatura_Motor1' },
+                            { label: 'Motor 2', data: [], borderColor: 'rgb(54, 162, 235)', backgroundColor: 'rgba(54, 162, 235, 0.1)', tension: 0.1, borderWidth: 2, pointRadius: 0, _telemetryName: 'Temperatura_Motor2' },
+                            { label: 'Motor 3', data: [], borderColor: 'rgb(255, 206, 86)', backgroundColor: 'rgba(255, 206, 86, 0.1)', tension: 0.1, borderWidth: 2, pointRadius: 0, _telemetryName: 'Temperatura_Motor3' },
+                            { label: 'Motor 4', data: [], borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.1)', tension: 0.1, borderWidth: 2, pointRadius: 0, _telemetryName: 'Temperatura_Motor4' }
+                        ]
+                    },
+                    options: chartConfigBase.options 
+                });
+                 return chart;
+            };
+
+            charts['AlturaDron'] = createChart('alturaChart', 'Altura (m)', 'rgb(75, 192, 192)', 'rgba(75, 192, 192, 0.2)', true);
+            charts['BaterA'] = createChart('bateriaChart', 'Batería (%)', 'rgb(255, 99, 132)', 'rgba(255, 99, 132, 0.2)', true);
+            charts['RPM'] = createChart('rpmChart', 'RPM', 'rgb(54, 162, 235)', 'rgba(54, 162, 235, 0.2)');
+            charts['AceleraciN'] = createChart('aceleracionChart', 'Aceleración (m/s²)', 'rgb(255, 159, 64)', 'rgba(255, 159, 64, 0.2)');
+            charts['Velocidad'] = createChart('velocidadChart', 'Velocidad (km/h)', 'rgb(153, 102, 255)', 'rgba(153, 102, 255, 0.2)');
+            charts['Temperatura'] = createTemperaturaChart('temperaturaChart'); 
+
+            console.log("[Init] Gráficos inicializados. Claves en 'charts':", Object.keys(charts));
+        }
+
+        function inicializarMapa() {
+            const initialCoords = [4.710989, -74.072092]; 
+            try {
+                map = L.map('map').setView(initialCoords, 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                dronMarker = L.marker(initialCoords, {
+                    icon: L.divIcon({
+                        className: 'dron-icon',
+                        html: '<i class="fas fa-helicopter"></i>', 
+                        iconSize: [24, 24], iconAnchor: [12, 24]
+                    })
+                }).addTo(map).bindPopup("Posición inicial Dron");
+                 console.log("[Init] Mapa inicializado.");
+            } catch(error) {
+                 console.error("[Init Error] Error inicializando mapa:", error);
+                 const mapDiv = document.getElementById('map');
+                 if(mapDiv) mapDiv.innerHTML = "<p>Error cargando mapa.</p>";
+            }
+        }
+
+        function actualizarValores() {
+            const updateElement = (id, chartKey, datasetIndex = 0, unit, decimals = 2) => {
+                const element = document.getElementById(id);
+                const chartInstance = charts[chartKey]; // Renombrado para evitar confusión con la variable global 'charts'
+                if (element && chartInstance && chartInstance.data.datasets.length > datasetIndex) {
+                    const dataset = chartInstance.data.datasets[datasetIndex];
+                    if (dataset.data.length > 0) {
+                        const lastPoint = dataset.data[dataset.data.length - 1];
+                        if (lastPoint && lastPoint.y !== null && lastPoint.y !== undefined && !isNaN(lastPoint.y)) {
+                            element.textContent = lastPoint.y.toFixed(decimals) + ` ${unit}`;
+                            return; 
+                        }
+                    }
+                }
+                if(element) {
+                    element.textContent = `-- ${unit}`;
+                }
+            };
+
+            updateElement('AlturaDron-value', 'AlturaDron', 0, 'm', 2);
+            updateElement('BaterA-value', 'BaterA', 0, '%', 1);
+            updateElement('Velocidad-value', 'Velocidad', 0, 'km/h', 2); 
+            updateElement('RPM-value', 'RPM', 0, '', 0); 
+            updateElement('Temperatura_Motor1-value', 'Temperatura', 0, '°C', 1); 
+        }
+
+        function actualizarMapa(lat, lon) {
+            if (map && dronMarker && lat !== null && lon !== null) {
+                const newLatLng = new L.LatLng(lat, lon);
+                dronMarker.setLatLng(newLatLng);
+            }
+        }
+
+        // Variables globales para Lat/Lon, actualizadas por WebSocket y datos iniciales
+        let latestLat = null; 
+        let latestLon = null;
+
+        function setupWebSocket() {
+            console.log("[WS Setup] Configurando WebSocket...");
+            const socket = io('http://localhost:5000'); 
+
+            const connectionStatus = document.getElementById('connectionStatus');
+
+            socket.on('connect', () => {
+                console.log('[WS Status] Conectado al servidor WebSocket');
+                connectionStatus.className = 'connection-status connected';
+                connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado';
+            });
+
+            socket.on('disconnect', () => {
+                console.warn('[WS Status] Desconectado del servidor WebSocket');
+                connectionStatus.className = 'connection-status disconnected';
+                connectionStatus.innerHTML = '<i class="fas fa-plug"></i> Desconectado';
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('[WS Status] Error de conexión WebSocket:', error);
+                connectionStatus.className = 'connection-status disconnected';
+                connectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error conexión';
+            });
+
+            socket.on('nuevos_datos', (datos) => {
+                console.log('[WS Data Received]', datos); 
+
+                if (typeof datos !== 'object' || datos === null) {
+                    console.warn("[WS Data Error] Se recibieron datos WebSocket en formato inesperado:", datos);
+                    return;
+                }
+
+                let chartsToUpdate = new Set(); 
+                let currentLat = null; 
+                let currentLon = null;
+
+                try {
+                    for (const [telemetry_name, puntos] of Object.entries(datos)) {
+                        console.log('[WS Processing Telemetry]', telemetry_name, 'Puntos:', Array.isArray(puntos) ? puntos.length : 'No es array');
+                        if (Array.isArray(puntos)) {
+                            puntos.forEach(punto => {
+                                if (punto && typeof punto === 'object' && 'value' in punto && 'timestamp' in punto) {
+                                    let ts = punto.timestamp;
+                                    if (typeof ts === 'string') {
+                                        const offsetZMmatch = ts.match(/(-|\+)\d{2}:\d{2}Z$/);
+                                        if (offsetZMmatch) {
+                                            ts = ts.slice(0, -1); 
+                                        }
+                                    }
+                                    const parsedDate = new Date(ts);
+                                    const numericValue = (!isNaN(punto.value) && punto.value !== null) ? Number(punto.value) : null;
+                                    
+                                    console.log('[WS Adding Point Candidate]', { 
+                                        telemetry: telemetry_name, 
+                                        original_ts: punto.timestamp, 
+                                        corrected_ts: ts, 
+                                        parsed_date: parsedDate.toISOString(), 
+                                        is_date_valid: !isNaN(parsedDate.getTime()),
+                                        value: numericValue 
+                                    });
+
+                                    if (!isNaN(parsedDate.getTime())) { 
+                                        let chartInstance = charts[telemetry_name]; // Renombrado
+                                        let datasetIndex = 0; 
+
+                                        if (telemetry_name.startsWith('Temperatura_Motor') && charts['Temperatura']) {
+                                            chartInstance = charts['Temperatura'];
+                                            datasetIndex = chartInstance.data.datasets.findIndex(ds => ds._telemetryName === telemetry_name);
+                                            if (datasetIndex === -1) {
+                                                console.warn(`[WS Data Error] Dataset para ${telemetry_name} no encontrado en gráfico de Temperatura.`);
+                                                chartInstance = null; 
+                                            }
+                                        } else if (!chartInstance) {
+                                             console.warn(`[WS Data Error] Gráfico para ${telemetry_name} no encontrado en 'charts'. Keys disponibles:`, Object.keys(charts));
+                                        } else if (chartInstance.data.datasets.length === 0) {
+                                            console.warn(`[WS Data Error] Gráfico para ${telemetry_name} no tiene datasets.`);
+                                            chartInstance = null;
+                                        }
+
+
+                                        if (chartInstance && datasetIndex !== -1) {
+                                            chartInstance.data.datasets[datasetIndex].data.push({ x: parsedDate, y: numericValue });
+                                            chartsToUpdate.add(chartInstance.canvas.id); // Usar chartInstance.canvas.id
+                                            console.log('[WS Point Added to Chart]', chartInstance.canvas.id, 'Dataset:', datasetIndex, 'New data length:', chartInstance.data.datasets[datasetIndex].data.length);
+                                        }
+
+                                        if (telemetry_name === 'Latitud') { currentLat = numericValue; } 
+                                        else if (telemetry_name === 'Longitud') { currentLon = numericValue; }
+
+                                    } else {
+                                        console.warn(`[WS Data Error] Timestamp inválido para ${telemetry_name}: ${punto.timestamp} (original: ${punto.timestamp})`);
+                                    }
+                                } 
+                            }); 
+                        } 
+                    } 
+
+                    if (currentLat !== null) latestLat = currentLat;
+                    if (currentLon !== null) latestLon = currentLon;
+
+                } catch (error) {
+                    console.error("[WS Data Error] Error procesando datos WebSocket:", error, "Datos problemáticos:", datos);
+                }
+
+                console.log('[WS chartsToUpdate Set]', Array.from(chartsToUpdate));
+
+                if (chartsToUpdate.size > 0 || (currentLat !== null || currentLon !== null)) { // Corregido: || para lat/lon
+                    console.log("[WS Visual Update] Actualizando visualizaciones...");
+                    actualizarValores(); 
+                    
+                    if (latestLat !== null && latestLon !== null) {
+                        actualizarMapa(latestLat, latestLon);
+                    }
+
+                    chartsToUpdate.forEach(chartId => { // chartId es el ID del canvas
+                        const chartToUpdateInstance = Chart.getChart(chartId); 
+                        if (chartToUpdateInstance) {
+                            console.log(`[WS Attempting Update] Gráfico con ID de canvas: ${chartId}`);
+                            
+                            chartToUpdateInstance.data.datasets.forEach(dataset => {
+                                const MAX_POINTS = (chartToUpdateInstance.canvas.id === 'temperaturaChart' ? 500 : 200); 
+                                if (dataset.data.length > MAX_POINTS) {
+                                    const amountToRemove = dataset.data.length - MAX_POINTS;
+                                    dataset.data.splice(0, amountToRemove);
+                                    console.log(`[WS Data Pruning] Gráfico ${chartId}, dataset '${dataset.label}', removidos ${amountToRemove} puntos. Quedan: ${dataset.data.length}`);
+                                }
+                                // Log de los últimos datos ANTES de llamar a update
+                                if (dataset.data.length > 0) {
+                                     console.log(`[WS Data before update] ${chartId}, dataset '${dataset.label}', Últimos 3 puntos:`, JSON.parse(JSON.stringify(dataset.data.slice(-3))));
+                                } else {
+                                     console.log(`[WS Data before update] ${chartId}, dataset '${dataset.label}' está vacío.`);
+                                }
+                            });
+                            
+                            chartToUpdateInstance.update('none'); 
+                            console.log(`[WS Update Called] Gráfico ${chartId} actualizado (llamada a update hecha).`);
+                        } else {
+                            console.warn(`[WS Visual Update Error] No se encontró chart para ID de canvas: ${chartId} al intentar llamar a update.`);
+                        }
+                    });
+                } else {
+                     console.log("[WS Visual Update] No hay gráficos para actualizar o no hay nueva posición.");
+                }
+            }); 
+        } 
+
+        async function cargarDatosIniciales() {
+            console.log("[Initial Load] Intentando cargar datos iniciales desde /api/datos-iniciales...");
+            try {
+                const response = await fetch('http://localhost:5000/api/datos-iniciales');
+                if (!response.ok) {
+                    console.warn(`[Initial Load Warn] No se pudo cargar datos iniciales (${response.status} ${response.statusText}). Iniciando vacío.`);
+                    for (const chartName in charts) {
+                        if (charts[chartName] && charts[chartName].data) { // Chequeo adicional
+                            charts[chartName].data.datasets.forEach(dataset => dataset.data = []);
+                            charts[chartName].update('none'); 
+                        }
+                    }
+                    return; 
+                }
+                const datos = await response.json();
+                console.log(`[Initial Load] Datos iniciales recibidos: ${datos.timestamps ? datos.timestamps.length : 0} puntos.`);
+
+                if (datos && typeof datos === 'object' && datos.timestamps && Array.isArray(datos.timestamps)) {
+                    const initialTimestamps = datos.timestamps;
+                    let lastLat = null, lastLon = null; 
+
+                    for (let i = 0; i < initialTimestamps.length; i++) {
+                        let ts = initialTimestamps[i];
+                        if (typeof ts === 'string') {
+                            const offsetZMmatch = ts.match(/(-|\+)\d{2}:\d{2}Z$/);
+                            if (offsetZMmatch) {
+                                ts = ts.slice(0, -1); 
+                            }
+                        }
+                        const parsedDate = new Date(ts); 
+
+                        if (!isNaN(parsedDate.getTime())) { 
+                            for (const telemetry_name in datos) {
+                                if (telemetry_name !== 'timestamps' && datos.hasOwnProperty(telemetry_name) && Array.isArray(datos[telemetry_name]) && i < datos[telemetry_name].length) {
+                                    const value = datos[telemetry_name][i]; 
+                                    const numericValue = (!isNaN(value) && value !== null) ? Number(value) : null;
+
+                                    let chartInstance = charts[telemetry_name]; // Renombrado
+                                    let datasetIndex = 0; 
+
+                                    if (telemetry_name.startsWith('Temperatura_Motor') && charts['Temperatura']) {
+                                        chartInstance = charts['Temperatura'];
+                                        datasetIndex = chartInstance.data.datasets.findIndex(ds => ds._telemetryName === telemetry_name);
+                                        if (datasetIndex === -1) {
+                                            console.warn(`[Initial Load Warn] Dataset para ${telemetry_name} no encontrado en gráfico de Temperatura.`);
+                                            chartInstance = null; 
+                                        }
+                                    } else if (!chartInstance) {
+                                        // Podría ser Latitud o Longitud, que no tienen gráfico dedicado
+                                        if (telemetry_name !== 'Latitud' && telemetry_name !== 'Longitud') {
+                                            console.warn(`[Initial Load Warn] Gráfico para ${telemetry_name} no encontrado.`);
+                                        }
+                                    } else if (chartInstance.data.datasets.length === 0) {
+                                         console.warn(`[Initial Load Warn] Gráfico para ${telemetry_name} no tiene datasets.`);
+                                         chartInstance = null;
+                                    }
+
+
+                                    if (chartInstance && datasetIndex !== -1) {
+                                        chartInstance.data.datasets[datasetIndex].data.push({ x: parsedDate, y: numericValue });
+                                    }
+
+                                    if (telemetry_name === 'Latitud') { lastLat = numericValue; } 
+                                    else if (telemetry_name === 'Longitud') { lastLon = numericValue;}
+                                } 
+                            } 
+                        } else {
+                            console.warn(`[Initial Load Warn] Timestamp inicial inválido en índice ${i}: ${initialTimestamps[i]}`); 
+                        }
+                    } 
+
+                    for (const chartKey in charts) { // Renombrado chartName a chartKey
+                        if (charts[chartKey] && charts[chartKey].data) { // Chequeo adicional
+                            charts[chartKey].data.datasets.forEach(dataset => {
+                                const MAX_POINTS = (charts[chartKey].canvas.id === 'temperaturaChart' ? 500 : 200); 
+                                if (dataset.data.length > MAX_POINTS) {
+                                    dataset.data.splice(0, dataset.data.length - MAX_POINTS);
+                                }
+                            });
+                            charts[chartKey].update('none'); 
+                        }
+                    }
+                    
+                    actualizarValores(); 
+                    if (lastLat !== null && lastLon !== null) {
+                        latestLat = lastLat; 
+                        latestLon = lastLon;
+                        actualizarMapa(latestLat, latestLon);
+                    } else {
+                         console.warn("[Initial Load Warn] No se encontraron Latitud/Longitud válidas en los datos iniciales.");
+                    }
+
+                } else {
+                     console.warn("[Initial Load Error] Formato de datos iniciales inesperado o sin timestamps válidos.");
+                     for (const chartKey in charts) {
+                         if (charts[chartKey] && charts[chartKey].data) {
+                             charts[chartKey].data.datasets.forEach(dataset => dataset.data = []);
+                             charts[chartKey].update('none');
+                         }
+                     }
+                }
+            } catch (error) {
+                console.error('[Initial Load Error] Error fatal cargando o procesando datos iniciales:', error);
+                for (const chartKey in charts) {
+                    if (charts[chartKey] && charts[chartKey].data) {
+                        charts[chartKey].data.datasets.forEach(dataset => dataset.data = []);
+                        charts[chartKey].update('none');
+                    }
+                }
+            }
+        } 
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("[DOM] DOM Cargado. Inicializando aplicación...");
+            inicializarMapa(); 
+            inicializarGraficos(); 
+
+            cargarDatosIniciales().finally(() => {
+                setupWebSocket(); 
+            });
+        });
+
+    </script>
+</body>
+</html>

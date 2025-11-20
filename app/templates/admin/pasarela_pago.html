@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasarela de Pago - Skyking</title>
+     <style>
+        /* --- Reseteo Básico y Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #121212; color: #E0E0E0; line-height: 1.6; display: flex; flex-direction: column; align-items: center; padding-top: 20px; padding-bottom: 20px; min-height: 100vh;}
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .page-padding { padding-top: 30px; padding-bottom: 50px; }
+        .navbar { background-color: #1E1E1E; padding: 15px 0; border-bottom: 1px solid #333; box-shadow: 0 2px 5px rgba(0,0,0,0.2); width: 100%; margin-bottom: 30px; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.8em; font-weight: 700; color: #00D9C0; text-decoration: none; }
+        .navbar-nav { list-style: none; display: flex; }
+        .navbar-nav li { margin-left: 25px; }
+        .navbar-nav li a { color: #E0E0E0; text-decoration: none; font-size: 1em; font-weight: 500; transition: color 0.3s ease; }
+        .navbar-nav li a:hover, .navbar-nav li a.active { color: #00D9C0; }
+        .navbar-profile .profile-btn { background: none; border: none; color: #E0E0E0; cursor: pointer; padding: 5px; }
+        .navbar-profile .profile-btn svg { width: 28px; height: 28px; stroke: #E0E0E0; transition: stroke 0.3s ease; }
+        .navbar-profile .profile-btn:hover svg { stroke: #00D9C0; }
+        h1 { font-size: 2.2em; color: #FFFFFF; margin-bottom: 30px; text-align: center; font-weight: 600; }
+        .card { background-color: #1E1E1E; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width:100%; max-width: 600px; margin: 20px auto; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; background-color: #2A2A2A; color: #E0E0E0; font-size: 1em; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #00D9C0; box-shadow: 0 0 0 0.2rem rgba(0,217,192,.25); }
+        .btn { text-decoration: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; transition: background-color 0.3s ease, transform 0.2s ease; display: inline-block; border: none; cursor: pointer; }
+        .btn-primary-custom { background-color: #00D9C0; color: #121212; } /* Renombrada para evitar conflicto con .btn-primary de más abajo */
+        .btn-primary-custom:hover { background-color: #00bfa5; transform: scale(1.03); }
+        .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px; }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+        .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+        /* Estilos específicos que usaste en el dashboard.html */
+        .alert[style*="background-color: #333"] { background-color: #333 !important; color: #fff !important; padding: 10px !important; margin-bottom:10px !important; border-left: 5px solid #00D9C0 !important; }
+        .alert[style*="border-left: 5px solid #dc3545"] { border-left-color: #dc3545 !important; }
+        .alert[style*="border-left: 5px solid #28a745"] { border-left-color: #28a745 !important; }
+        footer { background-color: #1E1E1E; color: #A0A0A0; text-align: center; padding: 25px 0; margin-top: 50px; border-top: 1px solid #333; width:100%;}
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand">Skyking</a>
+            <ul class="navbar-nav">
+                <li><a href="#">Volver al Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container page-padding">
+        <h1>Pasarela de Pago Segura</h1>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card mb-4">
+                    <h3>Resumen del Cargo</h3>
+                    <p><strong>Concepto:</strong> Pedido #P12345 de Pizzas Daniel</p>
+                    <p><strong>Monto a Pagar:</strong> <span style="font-size: 1.5em; color: #00D9C0;">$35,000.00</span></p>
+                </div>
+
+                <div class="card">
+                    <h3>Selecciona tu Método de Pago</h3>
+                    
+                    <div class="payment-method">
+                        <h4>Pagar con Nequi</h4>
+                        <p><small>Serás redirigido a Nequi para completar el pago.</small></p>
+                        <button class="btn btn-pay" style="background-color: #D83790; color: white;">Pagar con Nequi</button>
+                    </div>
+                    
+                    <div class="payment-method">
+                        <h4>Pagar con PSE</h4>
+                        <p><small>Selecciona tu banco y completa la transacción.</small></p>
+                        <button class="btn btn-pay" style="background-color: #0033A0; color: white;">Pagar con PSE</button>
+                    </div>
+
+                    <div class="payment-method">
+                        <h4>Pagar con Tarjeta de Crédito/Débito</h4>
+                        <form method="POST" action="#">
+                            <div class="form-group">
+                                <label for="card_name">Nombre en la Tarjeta:</label>
+                                <input type="text" id="card_name" name="card_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="card_number">Número de Tarjeta:</label>
+                                <input type="text" id="card_number" name="card_number" class="form-control" required placeholder="&#9679;&#9679;&#9679;&#9679; &#9679;&#9679;&#9679;&#9679; &#9679;&#9679;&#9679;&#9679; &#9679;&#9679;&#9679;&#9679;">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 form-group" style="flex: 0 0 60%; max-width:60%;">
+                                    <label for="expiry_date">Fecha de Expiración (MM/AA):</label>
+                                    <input type="text" id="expiry_date" name="expiry_date" class="form-control" required placeholder="MM/AA">
+                                </div>
+                                <div class="col-md-5 form-group" style="flex: 0 0 40%; max-width:40%;">
+                                    <label for="cvv">CVV:</label>
+                                    <input type="text" id="cvv" name="cvv" class="form-control" required placeholder="&#9679;&#9679;&#9679;">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-pay mt-3">Pagar Ahora con Tarjeta</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card">
+                    <h4>Pago Seguro</h4>
+                    <p>Tu información de pago está protegida mediante encriptación.</p>
+                    <p><small>Al continuar, aceptas nuestros Términos y Condiciones de servicio y políticas de privacidad.</small></p>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Skyking. Transacciones seguras.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Skyking</title>
+    {# Referencia a tu CSS global si lo tienes y es accesible desde este blueprint/plantilla #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <style>
+        /* --- Reseteo Básico y Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #121212; 
+            color: #E0E0E0; 
+            line-height: 1.6; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 0; /* Quitado el padding top para que la navbar pegue arriba */
+            padding-bottom: 20px; 
+            min-height: 100vh;
+        }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        /* .page-padding lo puedes usar dentro del main si quieres un padding general para el contenido */
+        
+        /* Navbar similar a tu list_restaurants */
+        .navbar { 
+            background-color: #1E1E1E; 
+            padding: 15px 0; 
+            border-bottom: 1px solid #333; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            width: 100%; 
+            margin-bottom: 30px; 
+            position: sticky; /* Para que se quede fija arriba */
+            top:0; 
+            z-index: 1000;
+        }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.8em; font-weight: 700; color: #00D9C0; text-decoration: none; }
+        .navbar-nav { list-style: none; display: flex; }
+        .navbar-nav li { margin-left: 25px; }
+        .navbar-nav li a { color: #E0E0E0; text-decoration: none; font-size: 1em; font-weight: 500; transition: color 0.3s ease; }
+        .navbar-nav li a:hover, .navbar-nav li a.active { color: #00D9C0; }
+        /* Fin Navbar */
+
+        h1 { font-size: 2.2em; color: #FFFFFF; margin-bottom: 15px; text-align: center; font-weight: 600; }
+        .profile-greeting { text-align:center; margin-bottom:30px; font-size:1.2em; color: #00D9C0;}
+
+        .profile-layout { display: flex; flex-wrap: wrap; gap: 30px; }
+        .profile-sidebar { flex: 1; min-width: 280px; /* max-width: 320px; Ajustado para más flexibilidad */ }
+        .profile-content { flex: 2; min-width: 300px; }
+
+        .card { background-color: #1E1E1E; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 25px; }
+        .card h3 { font-size: 1.4em; color: #00D9C0; margin-bottom: 20px; border-bottom: 1px solid #00D9C0; padding-bottom: 10px;}
+        .card p { margin-bottom: 10px; }
+        .card p strong { color: #ccc; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #ccc; font-size: 0.95em; }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="password"],
+        .form-group input[type="file"],
+        .form-group select, 
+        .form-group textarea { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid #444; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            background-color: #2A2A2A; 
+            color: #E0E0E0; 
+            font-size: 1em; 
+        }
+        .form-group input[type="file"] { padding: 8px 12px; /* Ajuste específico para file input */ }
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus { 
+            outline: none; 
+            border-color: #00D9C0; 
+            /* box-shadow: 0 0 0 0.2rem rgba(0,217,192,.25); Opcional */
+        }
+        
+        .btn { 
+            text-decoration: none; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            transition: background-color 0.3s ease, transform 0.2s ease; 
+            display: inline-block; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            text-align: center;
+        }
+        .btn-primary-custom { background-color: #00D9C0; color: #121212; }
+        .btn-primary-custom:hover { background-color: #00bfa5; transform: translateY(-1px); }
+        .btn-secondary-custom { background-color: #6c757d; color: white; }
+        .btn-secondary-custom:hover { background-color: #5a6268; transform: translateY(-1px); }
+        .btn-info-custom { background-color: #17a2b8; color: white; }
+        .btn-info-custom:hover { background-color: #138496; transform: translateY(-1px); }
+        .btn-sm { padding: 8px 15px; font-size: 0.85em; }
+        .btn-block { display: block; width: 100%; }
+
+
+        .profile-picture-container { text-align: center; }
+        .profile-picture { 
+            width: 150px; 
+            height: 150px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            margin-bottom: 15px; 
+            border: 3px solid #00D9C0; 
+            background-color: #2A2A2A; /* Fondo para cuando no hay imagen */
+        }
+        
+        /* Alertas de Flash (como en tu dashboard) */
+        .flash-messages { margin-bottom: 20px; }
+        .flash-messages .alert { 
+            background-color: #333; 
+            color: #fff; 
+            padding: 12px 15px; /* Un poco más de padding */
+            margin-bottom:15px; /* Un poco más de margen */
+            border-left: 5px solid #00D9C0; 
+            border-radius: 4px; 
+            font-size: 0.95em;
+        }
+        .flash-messages .alert.alert-danger { border-left-color: #dc3545; background-color: #49262a; } /* Fondo más oscuro para danger */
+        .flash-messages .alert.alert-success { border-left-color: #28a745; background-color: #223e2b; } /* Fondo más oscuro para success */
+        .flash-messages .alert.alert-warning { border-left-color: #ffc107; background-color: #4d3f1c; color: #f8f9fa;} /* Fondo y texto para warning */
+        .flash-messages .alert.alert-info { border-left-color: #17a2b8; background-color: #1c3c44; } /* Fondo más oscuro para info */
+
+
+        footer { 
+            background-color: #1E1E1E; 
+            color: #A0A0A0; 
+            text-align: center; 
+            padding: 25px 0; 
+            margin-top: auto; /* Empuja el footer hacia abajo */
+            border-top: 1px solid #333; 
+            width:100%;
+        }
+
+        @media (max-width: 768px) {
+            .profile-layout { flex-direction: column; }
+            .profile-sidebar { max-width: 100%; }
+            .navbar .container { flex-direction: column; gap: 10px; }
+            .navbar-nav { margin-top: 10px; justify-content: center; width: 100%;}
+            .navbar-nav li { margin: 0 10px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            {# Ajusta 'main.home_page' a la ruta de tu página de inicio principal si usas blueprints, o solo 'home_page' #}
+            <a href="{{ url_for('main.home_page') if 'main' in current_app.blueprints else url_for('home_page') }}" class="navbar-brand">Skyking</a>
+            <ul class="navbar-nav">
+                {# Ajusta estas rutas a los nombres de tus endpoints #}
+                <li><a href="{{ url_for('list_restaurants') if 'list_restaurants' in current_app.view_functions else '#' }}">Hacer Pedido</a></li> 
+                
+                {% if session.user_id %}
+                    {% set order_history_url = url_for('order_history') if 'order_history' in current_app.view_functions else '#' %}
+                    {% set mi_cuenta_url = url_for('user.mi_cuenta') %} {# Asumiendo que 'user.mi_cuenta' siempre existe si el usuario tiene sesión #}
+                    {% set logout_action_url = url_for('logout_user_ajax') if 'logout_user_ajax' in current_app.view_functions else '#' %}
+                    {% set login_redirect_url = url_for('show_login_page_auth') if 'show_login_page_auth' in current_app.view_functions else '#' %}
+
+                    <li><a href="{{ order_history_url }}">Mis Pedidos</a></li>
+                    <li><a href="{{ mi_cuenta_url }}" class="active">Mi Perfil</a></li>
+                    <li>
+                        <a href="{{ logout_action_url }}" 
+                           onclick="event.preventDefault(); 
+                                    fetch('{{ logout_action_url }}', { method: 'POST' })
+                                    .then(response => {
+                                        if (!response.ok) { 
+                                            console.error('Logout response not OK:', response.status, response.statusText);
+                                            return response.text().then(text => { throw new Error(text || 'Error en logout'); });
+                                        }
+                                        // Solo intentar parsear como JSON si el content-type es application/json
+                                        const contentType = response.headers.get('content-type');
+                                        if (contentType && contentType.includes('application/json')) {
+                                            return response.json();
+                                        } else {
+                                            // Si no es JSON, puede que la respuesta sea vacía o un redirect directo manejado por el backend
+                                            // En ese caso, el redirect_url en data no existirá.
+                                            return { redirect_url: null }; // O un objeto que indique éxito sin datos JSON
+                                        }
+                                    })
+                                    .then(data => { 
+                                        window.location.href = data.redirect_url || '{{ login_redirect_url }}'; 
+                                    })
+                                    .catch(error => { 
+                                        console.error('Error durante el logout fetch:', error); 
+                                        window.location.href = '{{ login_redirect_url }}'; 
+                                    });">
+                           Logout
+                        </a>
+                    </li>
+                {% else %}
+                    {% set login_url = url_for('show_login_page_auth') if 'show_login_page_auth' in current_app.view_functions else '#' %}
+                    <li><a href="{{ login_url }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 30px; padding-bottom: 50px;"> {/* Añadido page-padding aquí */}
+        <h1>Mi Perfil</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        {# Mostrar el nombre del usuario o su email si el nombre no está disponible #}
+        <p class="profile-greeting">Hola, {{ user.full_name or user.email or "Usuario" }}</p>
+
+        <div class="profile-layout">
+            <div class="profile-sidebar">
+                <div class="card profile-picture-container">
+                    <h3>Foto de Perfil</h3>
+                    <img src="{{ url_for('static', filename=user.profile_picture_url) if user.profile_picture_url else 'https://via.placeholder.com/150/2A2A2A/E0E0E0?text=Sin+Foto' }}" 
+                         alt="Foto de Perfil" 
+                         class="profile-picture" id="profileImagePreview">
+                    
+                    <form action="{{ url_for('user.mi_cuenta') }}" method="POST" enctype="multipart/form-data" style="margin-top:15px;"> 
+                        <input type="hidden" name="action" value="update_profile_picture">
+                        <div class="form-group">
+                            <label for="profile_picture">Cambiar/Subir foto:</label>
+                            <input type="file" name="profile_picture" id="profile_picture" class="form-control-file" accept="image/png, image/jpeg, image/gif">
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-sm btn-block">Actualizar Foto</button>
+                    </form>
+                </div>
+
+                {# Ejemplo de otra tarjeta en el sidebar, como la de puntos que tenías #}
+                {# <div class="card">
+                    <h3>Puntos Acumulados</h3>
+                    <h4>Tienes <strong>{{ user.points or 0 }}</strong> puntos.</h4>
+                    <p><small>¡Sigue pidiendo para acumular más y obtener recompensas!</small></p>
+                </div> #}
+            </div>
+
+            <div class="profile-content">
+                <div class="card">
+                    <h3>Datos Personales</h3>
+                    <form action="{{ url_for('user.mi_cuenta') }}" method="POST">
+                        <input type="hidden" name="action" value="update_profile_data">
+                        <div class="form-group">
+                            <label for="full_name">Nombre Completo:</label>
+                            <input type="text" id="full_name" name="full_name" value="{{ user.full_name or '' }}" placeholder="Tu nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico:</label>
+                            <input type="email" id="email" name="email" value="{{ user.email or '' }}" readonly style="background-color: #383838; color: #888; cursor: not-allowed;" title="El correo electrónico no se puede cambiar.">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Teléfono:</label>
+                            <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number or '' }}" placeholder="Tu número de teléfono">
+                        </div>
+                        
+                        {# Aquí puedes añadir más campos si son editables, ej. Dirección para usuarios 'user' #}
+                        {# {% if user.role == 'user' %}
+                        <div class="form-group">
+                            <label for="address">Dirección Principal:</label>
+                            <textarea id="address" name="address" rows="3" placeholder="Tu dirección principal">{{ user.address or '' }}</textarea>
+                        </div>
+                        {% endif %} #}
+
+                        <button type="submit" class="btn btn-primary-custom btn-block">Guardar Cambios de Datos</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3>Seguridad</h3>
+                    <form action="{{ url_for('user.mi_cuenta') }}" method="POST">
+                        <input type="hidden" name="action" value="change_password">
+                        <div class="form-group">
+                            <label for="current_password">Contraseña Actual:</label>
+                            <input type="password" id="current_password" name="current_password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_password">Nueva Contraseña:</label>
+                            <input type="password" id="new_password" name="new_password" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_new_password">Confirmar Nueva Contraseña:</label>
+                            <input type="password" id="confirm_new_password" name="confirm_new_password" minlength="6" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-block">Cambiar Contraseña</button>
+                    </form>
+                </div>
+
+                {# Mantengo la sección de historial de pedidos como la tenías, como un enlace #}
+                <div class="card">
+                     <h3>Historial de Pedidos</h3>
+                     {# Aquí podrías mostrar un resumen de los últimos N pedidos si quieres #}
+                     <p>Consulta tus pedidos anteriores y su estado.</p>
+                     <a href="{{ url_for('order_history') if 'order_history' in current_app.view_functions else '#' }}" class="btn btn-info-custom btn-block">Ver Historial Completo</a>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; {{ "now"|date("Y") }} Skyking. Todos los derechos reservados.</p> {# Usar filtro de fecha de Jinja para el año #}
+        </div>
+    </footer>
+
+    <script>
+        const profilePicUpload = document.getElementById('profile_picture');
+        const profileImagePreview = document.getElementById('profileImagePreview');
+        
+        if (profilePicUpload && profileImagePreview) {
+            const originalImageSrc = profileImagePreview.src; // Guardar la imagen original o placeholder
+            profilePicUpload.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profileImagePreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    // Si el usuario deselecciona, podrías querer volver a la imagen original
+                    // profileImagePreview.src = originalImageSrc; 
+                }
+            });
+        }
+    </script>
+</body>
+</html>

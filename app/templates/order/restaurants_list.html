@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurantes Disponibles - Skyking</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    
+    <style>
+        /* --- Reseteo Básico y Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212; /* Fondo principal oscuro */
+            color: #E0E0E0; /* Texto principal claro */
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-padding {
+            padding-top: 30px;
+            padding-bottom: 50px;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            background-color: #1E1E1E; /* Fondo de la navbar, ligeramente más claro que el body */
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky; /* Para que se quede fija arriba */
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #00D9C0; 
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            list-style: none;
+            display: flex;
+        }
+
+        .navbar-nav li {
+            margin-left: 25px;
+        }
+
+        .navbar-nav li a {
+            color: #E0E0E0;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav li a:hover,
+        .navbar-nav li a.active { 
+            color: #00D9C0; 
+        }
+        
+        .navbar-profile .profile-btn {
+            background: none;
+            border: none;
+            color: #E0E0E0;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .navbar-profile .profile-btn svg {
+            width: 28px;
+            height: 28px;
+            stroke: #E0E0E0; 
+            transition: stroke 0.3s ease;
+        }
+        .navbar-profile .profile-btn:hover svg {
+            stroke: #00D9C0;
+        }
+
+        /* --- Títulos Principales de Página --- */
+        h1 {
+            font-size: 2.5em;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-weight: 500;
+            border-bottom: 2px solid #00D9C0; 
+            padding-bottom: 10px;
+            display: inline-block; 
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: #E0E0E0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* --- Sección de Categorías --- */
+        .categories {
+            margin-bottom: 40px;
+            text-align: center; 
+        }
+        .categories h2 {
+            margin-left: auto; 
+            margin-right: auto;
+        }
+
+        .category-list {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap; 
+            margin-top: 20px;
+        }
+
+        .category-item {
+            background-color: #2A2A2A;
+            color: #E0E0E0;
+            border: 1px solid #444;
+            padding: 10px 25px;
+            border-radius: 25px; 
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .category-item:hover {
+            background-color: #3f3f3f;
+            border-color: #00D9C0;
+        }
+
+        .category-item.active {
+            background-color: #00D9C0; 
+            color: #121212; 
+            border-color: #00D9C0;
+        }
+
+        /* --- Sección de Listados (Restaurantes) --- */
+        .listings {
+            margin-bottom: 40px;
+        }
+
+        .grid-listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 25px;
+        }
+
+        .card.listing-item {
+            background-color: #1E1E1E; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.listing-item:hover {
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .listing-img {
+            width: 100%;
+            height: 200px; 
+            object-fit: cover; 
+            border-bottom: 3px solid #00D9C0; 
+        }
+
+        .card-body {
+            padding: 20px;
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-body h3 { /* Nombre del Restaurante */
+            font-size: 1.4em;
+            margin-bottom: 8px;
+            color: #FFFFFF; 
+        }
+
+        .card-body p { /* Descripción, etc. */
+            font-size: 0.9em;
+            color: #A0A0A0; 
+            margin-bottom: 8px;
+        }
+        
+        /* Ajuste para que el botón "Ver Menú" se alinee abajo */
+        .card-body .btn-view-menu {
+            margin-top: auto; 
+        }
+
+        .btn-view-menu {
+            background-color: #00D9C0;
+            color: #121212;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: inline-block; 
+        }
+
+        .btn-view-menu:hover {
+            background-color: #00bfa5; 
+            color: #000000;
+        }
+
+        /* --- Sección de Checkout Preview --- */
+        .checkout-preview {
+            background-color: #1E1E1E;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .checkout-preview h4 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: #FFFFFF;
+        }
+
+        .checkout-preview p {
+            color: #A0A0A0;
+            margin-bottom: 20px;
+        }
+
+        .btn { 
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff; 
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: scale(1.03);
+        }
+
+        .btn-block { 
+            display: block;
+            width: 100%;
+            max-width: 300px; 
+            margin: 0 auto; 
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: #1E1E1E;
+            color: #A0A0A0;
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 50px; 
+            border-top: 1px solid #333;
+        }
+         /* --- Media Queries --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.6em; }
+            .navbar .container { flex-direction: column; gap: 10px; }
+            .navbar-nav { margin-top: 10px; }
+            .navbar-nav li { margin: 0 10px; }
+            .grid-listings { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .category-list { flex-direction: column; align-items: stretch; }
+            .category-item { width: 100%; text-align: center; }
+            .navbar-brand { font-size: 1.5em; }
+            .navbar-nav li a { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="{{ url_for('home_page') }}" class="navbar-brand">Skyking</a> <ul class="navbar-nav">
+                    <li><a href="{{ url_for('show_datos_dron_page') }}">Seguimiento</a></li>
+                    <li><a href="{{ url_for('list_restaurants') }}" class="active">Hacer Pedido</a></li>
+                    <li><a href="#">Contacto</a></li> </ul>
+                <div class="navbar-profile">
+                    {% if session.user_id %}
+                        <span style="color: #E0E0E0; margin-right: 15px;">Hola, {{ session.user_email | default('Usuario') }}</span>
+                        <a href="{{ url_for('logout_user_ajax') }}" class="navbar-nav-link" style="color: #E0E0E0; text-decoration: none; margin-right: 10px;" 
+                           onclick="event.preventDefault(); fetch(this.href, {method: 'POST'}).then(() => window.location.href='*')">
+                           Logout
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('show_login_page_auth') }}" class="profile-btn" title="Login/Registro">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container page-padding">
+        <h1>¿Qué te apetece hoy?</h1>
+
+        <section class="categories">
+            <h2>Categorías</h2>
+            <div class="category-list">
+                <button class="category-item active">Restaurantes</button>
+                <button class="category-item">Supermercados</button>
+                <button class="category-item">Farmacias</button>
+                <button class="category-item">Tiendas</button>
+            </div>
+        </section>
+
+        <section class="listings">
+            <h2>Restaurantes Disponibles</h2> {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="background-color: #333; color: #fff; padding: 10px; margin-bottom:15px; border-left: 5px solid #00D9C0;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="grid-listings">
+                {% if restaurants %}
+                    {% for restaurant in restaurants %}
+                    <div class="card listing-item">
+                        
+                        {# ---- INICIO DE LA MODIFICACIÓN IMPORTANTE ---- #}
+                        {% if restaurant.logo_image_url %}
+                            <img src="{{ url_for('static', filename=restaurant.logo_image_url) }}" alt="Logo de {{ restaurant.name }}" class="listing-img">
+                        {% else %}
+                            {# Esta es la Opción 2: Mostrar un recuadro si no hay logo específico #}
+                            <div class="listing-img" style="background-color: #333; display: flex; align-items: center; justify-content: center; text-align: center;">
+                                <span style="color: #888; font-size: 0.9em;">Logo no disponible</span>
+                            </div>
+                        {% endif %}
+                        {# ---- FIN DE LA MODIFICACIÓN IMPORTANTE ---- #}
+                        
+                        <div class="card-body">
+                            <h3>{{ restaurant.name }}</h3>
+                            <p>{{ restaurant.description | default('Descripción no disponible.') }}</p>
+                            <p>Dirección: {{ restaurant.address | default('No especificada') }}</p>
+                            <p>Tel: {{ restaurant.phone_number | default('No especificado') }}</p>
+                            <a href="{{ url_for('restaurant_menu', restaurant_id=restaurant.id) }}" class="btn-view-menu">Ver Menú</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No hay restaurantes disponibles en este momento. ¡Vuelve pronto!</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="checkout-preview">
+            <h4>Tu Pedido</h4>
+            <p>Aún no has añadido nada.</p>
+            <a href="{{ url_for('view_cart') }}" class="btn btn-primary btn-block">Ver Carrito y Proceder al Pago</a>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Skyking. Todos los derechos reservados.</p> </div>
+    </footer>
+</body>
+</html>

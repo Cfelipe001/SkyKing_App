@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Todos los Pedidos del Sistema - Admin Skyking{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Estilos específicos para esta tabla si son necesarios */
+        .table th, .table td { vertical-align: middle; font-size: 0.85em; } /* Texto un poco más pequeño */
+        .table .btn-sm { padding: .25rem .5rem; font-size: .8rem; }
+        .page-padding { padding-top: 30px; padding-bottom: 50px; }
+        .filter-form { background-color: #1E1E1E; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .filter-form .form-group { margin-right: 15px; display: inline-block; }
+        .filter-form label { margin-right: 5px; font-size: 0.9em; }
+        .filter-form input[type="date"], .filter-form select {
+            background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444; 
+            padding: 5px 8px; font-size:0.9em; border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver al Panel Admin</a>
+    <h1><i class="fas fa-list-alt"></i> Todos los Pedidos del Sistema</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid  border_color;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="filter-form">
+        <form method="GET" action="{{ url_for('admin.view_all_system_orders') }}">
+            <div class="form-group">
+                <label for="status_filter">Filtrar por Estado:</label>
+                <select name="status" id="status_filter">
+                    <option value="">Todos</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="confirmed">Confirmado</option>
+                    <option value="preparing">Preparando</option>
+                    <option value="out_for_delivery">En Camino</option>
+                    <option value="delivered">Entregado</option>
+                    <option value="cancelled">Cancelado</option>
+                    <option value="failed">Fallido</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date_filter">Filtrar por Fecha:</label>
+                <input type="date" name="date" id="date_filter">
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary-custom" style="padding: 5px 15px; font-size:0.9em;">Filtrar</button>
+        </form>
+    </div>
+
+
+    {% if orders %}
+        <div class="card" style="background-color: #1E1E1E; padding: 20px; border-radius: 8px;">
+            <div style="overflow-x:auto;">
+                <table class="table" style="color: #E0E0E0; width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left;">
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">ID Pedido</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Cliente</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Restaurante</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Fecha</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Total</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Estado</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Entrega</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Repartidor</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #555; color: #00D9C0;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order_item in orders %} {# Cambiado 'order' a 'order_item' para evitar conflicto con variable 'order' global si existiera #}
+                        <tr style="border-top: 1px solid #333;">
+                            <td style="padding: 10px;">#{{ order_item.id }}</td>
+                            <td style="padding: 10px;">{{ order_item.customer_name | default(order_item.customer_email) }}</td>
+                            <td style="padding: 10px;">{{ order_item.restaurant_name | default('N/A') }}</td>
+                            <td style="padding: 10px;">
+                                {% if order_item.ordered_at %}
+                                    {{ order_item.ordered_at.strftime('%d/%m/%Y %H:%M') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td style="padding: 10px;">${{ "{:,.2f}".format(order_item.total_amount) }}</td>
+                            <td style="padding: 10px;"><span style="text-transform: capitalize; font-weight:bold;">{{ order_item.status | replace('_', ' ') }}</span></td>
+                            <td style="padding: 10px;"><span style="text-transform: capitalize;">{{ order_item.delivery_type | default('N/A') }}</span></td>
+                            <td style="padding: 10px;">{{ order_item.delivery_person_name | default('No Asignado') }}</td>
+                            <td style="padding: 10px; white-space: nowrap;">
+                                <a href="{{ url_for('admin.view_order_details_by_admin', order_id=order_item.id) }}" class="btn btn-sm btn-info-custom" style="background-color: #17a2b8; color:white; text-decoration:none;">Ver Detalles</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert" style="background-color: #333; color: #fff; padding: 15px; border-left: 5px solid #17a2b8; border-radius: 4px;">
+            No hay pedidos en el sistema para mostrar (o que coincidan con los filtros).
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

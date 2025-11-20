@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyking - Entregas Inteligentes a tu Alcance</title>
+    <style>
+        /* --- Reseteo Básico y Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #121212; color: #E0E0E0; line-height: 1.6; display: flex; flex-direction: column; padding-top: 0; padding-bottom: 20px; min-height: 100vh;}
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        
+        main { /* <<< NUEVA REGLA AÑADIDA AQUÍ */
+            width: 100%;
+        }
+
+        /* --- NUEVOS ESTILOS PARA NAVBAR --- */
+        .navbar { 
+            background-color: #1E1E1E; 
+            padding: 10px 0; 
+            border-bottom: 1px solid #333; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            width: 100%; 
+            position: sticky; 
+            top:0; 
+            z-index: 1000;
+            margin-bottom: 0; 
+        }
+
+        .navbar-container-flex {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand-skyking {
+            font-size: 1.8em; 
+            font-weight: 700; 
+            color: #00D9C0; 
+            text-decoration: none;
+            margin-right: 20px; 
+        }
+
+        .navbar-main-links {
+            list-style: none;
+            padding: 0;
+            margin: 0; 
+            display: flex;
+            flex-grow: 1; 
+            justify-content: flex-start; 
+        }
+
+        .navbar-main-links li {
+            margin-left: 25px; 
+        }
+        .navbar-main-links li:first-child {
+            margin-left: 0; 
+        }
+
+        .navbar-main-links li a {
+            color: #E0E0E0; 
+            text-decoration: none; 
+            font-size: 1em; 
+            font-weight: 500; 
+            transition: color 0.3s ease;
+        }
+        .navbar-main-links li a:hover, 
+        .navbar-main-links li a.active { 
+            color: #00D9C0; 
+        }
+
+        .navbar-right-group .navbar-nav-items { 
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-right-group .navbar-nav-items li { 
+            margin-left: 15px; 
+        }
+        
+        .action-button { 
+            background-color: #007bff; 
+            padding: 8px 15px; 
+            border-radius: 20px; 
+            color: #fff; 
+            text-decoration: none; 
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .action-button:hover {
+            background-color: #0056b3; 
+        }
+
+        .user-menu-container { position: relative; }
+        .user-icon-link { display: inline-block; cursor:pointer; }
+        .user-icon-link svg { width: 28px; height: 28px; stroke: #E0E0E0; transition: stroke 0.3s ease; }
+        .user-icon-link:hover svg { stroke: #00D9C0; }
+        .user-dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background-color: #1E1E1E; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-radius: 4px; z-index: 1010; padding: 10px; border: 1px solid #333;}
+        .user-menu-container:hover .user-dropdown-menu { display: block; }
+        .user-dropdown-menu a { display: block; color: #E0E0E0; text-decoration: none; padding: 10px 15px; margin: 0; border-radius: 4px; text-align: left; font-size: 0.95em; }
+        .user-dropdown-menu a:hover { background-color: #00D9C0; color: #121212; }
+        /* --- FIN NUEVOS ESTILOS NAVBAR --- */
+
+
+        /* --- Estilos Hero Section (mantenidos y ajustados) --- */
+        img, video { max-width: 100%; height: auto; display: block; }
+        .hero-section {
+            position: relative;
+            text-align: center;
+            padding: 100px 20px;
+            min-height: calc(100vh - 60px); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            width: 100%; 
+        }
+        .hero-section .background-video-wrapper {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+        }
+        .hero-section .background-video-wrapper video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .hero-section .video-mask {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: -1;
+        }
+        .hero-section .hero-content-wrapper { z-index: 1; }
+        .hero-section h1.main-headline { 
+            font-size: 3.5em; font-weight: bold; color: white; margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+        }
+        .hero-section p.hero-description { font-size: 1.5em; font-weight: 500; line-height: 1.4; color: white; margin-bottom: 30px; max-width: 750px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);}
+        .hero-buttons a { 
+            background-color: rgba(0, 217, 192, 0.9); 
+            color: #121212; 
+            border: none; 
+            padding: 14px 28px; 
+            margin: 0 10px; 
+            cursor: pointer; 
+            font-size: 1.1em; 
+            font-weight: bold;
+            border-radius: 30px;
+            text-decoration: none; 
+            display: inline-block; 
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .hero-buttons a:hover {
+             background-color: #00bfa5; 
+             transform: scale(1.05);
+        }
+        .hero-buttons .secondary-action-btn { 
+            background-color: rgba(255, 255, 255, 0.15); 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .hero-buttons .secondary-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        /* --- Estilos Content Section (mantenidos) --- */
+        .content-section { padding: 60px 20px; text-align: center; width: 100%; }
+        .content-section.dark { background-color: #141414; color: #fff; }
+        .content-section.black { background-color: #000; color: #fff; }
+        .content-section h2 { font-size: 2.8em; margin-bottom: 20px; color: #00D9C0; }
+        .content-section h3 { font-size: 1.8em; margin-bottom: 15px; color: #FFFFFF;}
+        .content-section p { max-width: 800px; margin: 0 auto 20px auto; line-height: 1.7; font-size: 1.1em; color: #E0E0E0;}
+        .content-section .text-description { font-weight: 500; font-size: 1.2em; line-height: 1.6; color: #E0E0E0; max-width: 750px; margin: 0 auto; }
+
+        .feature-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 40px; }
+        .feature-item { background-color: #1E1E1E; padding: 25px; border-radius: 8px; width: 320px; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease; }
+        .feature-item:hover { transform: translateY(-5px); }
+        .feature-item img, .feature-item video { margin-bottom: 15px; border-radius: 4px; }
+        .feature-item h4 { font-size: 1.4em; margin-top: 0; margin-bottom: 10px; color: #00D9C0; }
+        .feature-item h4 i { margin-right: 8px; } 
+        .feature-item p { font-size: 0.95em; color: #ccc; max-width: none; margin-bottom: 0; }
+
+        .background-image-section {
+            background-size: cover; background-position: center; padding: 100px 20px;
+            text-align: center; position:relative; width: 100%; 
+        }
+        .background-image-section::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5); z-index: 1;
+        }
+        .background-image-section h2, .background-image-section p {
+            color: #fff; position:relative; z-index:2;
+        }
+        .background-image-section h2 {
+            padding: 15px 25px; display: inline-block; border-radius: 8px;
+            font-size: 2.5em; margin-bottom: 20px;
+        }
+        .background-image-section p {
+             max-width: 700px; margin: 20px auto 0 auto; font-size: 1.1em;
+        }
+
+        /* --- Estilos Contact Form (mantenidos) --- */
+        .contact-form-section { background-color: #1E1E1E; color: #E0E0E0; padding: 80px 20px; width: 100%; }
+        .contact-form-container { max-width: 700px; margin: 0 auto; text-align: left; }
+        .contact-form-container label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc;}
+        .contact-form-container input, .contact-form-container select, .contact-form-container textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; background-color:#2A2A2A; color:#E0E0E0;}
+        .contact-form-container .form-row { display: flex; justify-content: space-between; gap: 20px; }
+        .contact-form-container .form-row > div { flex-basis: calc(50% - 10px); } 
+        .contact-form-container button { background-color: #00D9C0; color: #121212; padding: 12px 30px; border: none; border-radius: 25px; cursor: pointer; font-size: 1.1em; font-weight:bold;}
+        .contact-form-container .checkbox-area { display: flex; align-items: center; margin-bottom: 25px; }
+        .contact-form-container .checkbox-area input { width: auto; margin-right: 10px; }
+
+        /* --- Estilos Footer (mantenidos) --- */
+        .site-footer { background-color: #000; color: #aaa; padding: 50px 20px; text-align: center; border-top: 1px solid #333; width: 100%; }
+        .footer-links-grid { display: flex; flex-wrap: wrap; justify-content: space-around; margin-bottom: 40px; text-align: left; }
+        .footer-column { margin: 15px; min-width: 180px; }
+        .footer-column h4 { color: #fff; margin-bottom: 15px; font-size: 1.1em; }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li a { color: #aaa; text-decoration: none; line-height: 2; font-size: 0.95em; }
+        .footer-column ul li a:hover { color: #00D9C0; }
+        .footer-subscribe input[type="email"] { padding: 10px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #fff; margin-right: 5px; }
+        .footer-subscribe button { background-color: #00D9C0; color: #121212; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight:bold;}
+        .social-icons a { color: #aaa; margin: 0 12px; font-size: 1.6em; text-decoration: none; }
+        .social-icons a:hover { color: #00D9C0; }
+        .footer-bottom-links a { color: #aaa; margin: 0 10px; text-decoration: none; font-size: 0.9em; }
+        .footer-bottom-links a:hover { color: #00D9C0; }
+        .copyright { font-size: 0.9em; margin-top: 25px; }
+
+        .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+    <header> 
+        <nav class="navbar">
+            <div class="navbar-container-flex">
+                <a href="#" class="navbar-brand-skyking">Skyking</a>
+
+                <ul class="navbar-main-links">
+                    <li><a href="#servicios">Nuestros Servicios</a></li>
+                    <li><a href="#como-funciona">Cómo Funciona</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+
+                <div class="navbar-right-group">
+                    <ul class="navbar-nav-items">
+                        <li class="user-menu-container">
+                            <a href="#" title="Usuario" class="user-icon-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </a>
+                            <div class="user-dropdown-menu">
+                                <a href="login.html">Iniciar Sesión</a>
+                                <a href="register.html">Registrarse</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#solicitar" class="action-button">Solicitar Envío</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section" id="home">
+            <div class="background-video-wrapper">
+                <video loop autoplay muted playsinline poster="https://www-cdn.djiits.com/dps/911103eaf5f09c52a54262cc83800ee7.jpg">
+                    <source src="https://www-cdn.djiits.com/reactor/assets/_next/static/videos/0e503d64-99ca-4ba4-9cca-cfac6d952690.mp4" type="video/mp4">
+                    Tu navegador no soporta la etiqueta de video.
+                </video>
+            </div>
+            <div class="video-mask"></div>
+            <div class="hero-content-wrapper">
+                <h1 class="main-headline">Skyking</h1>
+                <p class="hero-description">Soluciones innovadoras para tus envíos. Rápido, seguro y eficiente, por aire y tierra.</p>
+                <div class="hero-buttons">
+                    <a href="#servicios">Descubre Nuestros Servicios</a>
+                    <a href="#contacto" class="secondary-action-btn">Contáctanos</a>
+                </div>
+                <p style="font-size: 0.9em; color: #ccc; margin-top: 30px;">Comprometidos con la puntualidad y la seguridad de tus paquetes.</p>
+            </div>
+        </section>
+
+        <section class="content-section dark" id="introduction">
+            <div class="container">
+                <p class="text-description">
+                    En <strong>Skyking</strong>, revolucionamos la logística de entregas combinando tecnología de vanguardia con una red de transporte versátil. Ya sea por dron para alcanzar lugares difíciles o mediante nuestra flota terrestre ágil, garantizamos que tus paquetes lleguen a tiempo y en perfectas condiciones.
+                </p>
+            </div>
+        </section>
+
+        <section class="content-section black" id="servicios">
+            <div class="container">
+                <h2>Nuestros Servicios de Entrega</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <img src="https://via.placeholder.com/320x180.png?text=Entrega+con+Dron+Skyking" alt="Entrega con Dron Skyking">
+                        <h4>Entregas Aéreas con Drones</h4>
+                        <p>Ideal para paquetes urgentes, zonas de difícil acceso o cuando la velocidad es crítica. Tecnología de punta para una entrega precisa.</p>
+                    </div>
+                    <div class="feature-item">
+                         <img src="https://via.placeholder.com/320x180.png?text=Entrega+Terrestre+Skyking" alt="Entrega Terrestre Skyking">
+                        <h4>Entregas Terrestres Flexibles</h4>
+                        <p>Contamos con una red de motocicletas y bicicletas para entregas urbanas rápidas y ecológicas, adaptadas a tus necesidades.</p>
+                    </div>
+                    <div class="feature-item">
+                        <img src="https://via.placeholder.com/320x180.png?text=Seguimiento+GPS+Skyking" alt="Seguimiento en Tiempo Real con Skyking">
+                        <h4>Seguimiento en Tiempo Real</h4>
+                        <p>Monitorea tu envío en cada etapa del proceso con nuestra plataforma de seguimiento detallada y actualizada al instante.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="background-image-section" id="como-funciona" style="background-image: url('https://via.placeholder.com/1920x1080.png?text=Fondo+Proceso+Skyking');">
+            <h2>Así de Fácil es Enviar con Skyking</h2>
+            <p>Solicita, preparamos y entregamos. Simplificamos la logística para ti.</p>
+        </section>
+
+        <section class="content-section black" id="beneficios">
+            <div class="container">
+                 <h3>Beneficios Clave de Elegir Skyking</h3>
+                <div class="feature-grid">
+                    <div class="feature-item" style="background-color: rgba(0,217,192,0.05);">
+                        <h4><i class="fas fa-tachometer-alt" aria-hidden="true"></i> Rapidez y Eficiencia</h4>
+                        <p>Optimizamos rutas y utilizamos el medio de transporte adecuado para garantizar la entrega más rápida posible.</p>
+                    </div>
+                    <div class="feature-item" style="background-color: rgba(0,217,192,0.05);">
+                        <h4><i class="fas fa-shield-alt" aria-hidden="true"></i> Seguridad Garantizada</h4>
+                        <p>Tus paquetes son nuestra prioridad. Protocolos estrictos y seguimiento constante para tu tranquilidad.</p>
+                    </div>
+                    <div class="feature-item" style="background-color: rgba(0,217,192,0.05);">
+                        <h4><i class="fas fa-cloud" aria-hidden="true"></i> Tecnología Innovadora</h4>
+                        <p>Plataforma intuitiva, seguimiento GPS y la última tecnología para un servicio superior en cada entrega.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="contact-form-section" id="contacto">
+            <div class="contact-form-container">
+                <h2 style="text-align:center; font-size: 2.8em; margin-bottom: 15px; color: #E0E0E0;">Contáctanos</h2>
+                <p style="text-align:center; max-width: 800px; margin: 0 auto 40px auto; line-height: 1.6; color: #ccc;">
+                    ¿Listo para optimizar tus envíos o tienes alguna pregunta? Completa el formulario y nuestro equipo Skyking se pondrá en contacto contigo.
+                </p>
+                <form action="#" method="POST"> 
+                    <div class="form-row">
+                        <div>
+                            <label for="contact_name">Nombre*</label>
+                            <input type="text" id="contact_name" name="contact_name" required>
+                        </div>
+                        <div>
+                            <label for="contact_company">Empresa (Opcional)</label> 
+                            <input type="text" id="contact_company" name="contact_company">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="contact_email">Email*</label>
+                            <input type="email" id="contact_email" name="contact_email" required>
+                        </div>
+                        <div>
+                            <label for="contact_phone">Teléfono*</label>
+                            <input type="tel" id="contact_phone" name="contact_phone" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="contact_service_type">Tipo de Servicio de Interés*</label>
+                        <select id="contact_service_type" name="contact_service_type" required>
+                            <option value="">Selecciona un servicio...</option>
+                            <option value="envio_paquete_personal">Envío de Paquetes Personales</option>
+                            <option value="envio_paquete_comercial">Envío de Paquetes Comerciales</option>
+                            <option value="logistica_empresarial">Soluciones Logísticas para Empresas</option>
+                            <option value="consulta_general">Consulta General sobre Skyking</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="contact_message">Mensaje*</label>
+                        <textarea id="contact_message" name="contact_message" rows="5" required></textarea>
+                    </div>
+                    <div class="checkbox-area">
+                        <input type="checkbox" id="contact_consent" name="contact_consent" required>
+                        <label for="contact_consent" style="font-weight:normal; font-size:0.9em; color:#ccc;">Acepto la <a href="#" style="color:#00D9C0;">Política de Privacidad</a> y los <a href="#" style="color:#00D9C0;">Términos de Servicio</a> de Skyking.</label>
+                    </div>
+                    <button type="submit">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-links-grid">
+                <div class="footer-column">
+                    <h4>Skyking</h4>
+                    <ul>
+                        <li><a href="#">Sobre Nosotros</a></li>
+                        <li><a href="#">Trabaja con Nosotros</a></li>
+                        <li><a href="#">Blog de Logística</a></li>
+                        <li><a href="#">Prensa Skyking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a href="#">Envío con Drones Skyking</a></li>
+                        <li><a href="#">Envío Terrestre Skyking</a></li>
+                        <li><a href="#">Soluciones Empresariales</a></li>
+                        <li><a href="#">Rastreo Avanzado</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Soporte</h4>
+                    <ul>
+                        <li><a href="#">Centro de Ayuda (FAQ)</a></li>
+                        <li><a href="#contacto">Contactar Soporte Skyking</a></li>
+                        <li><a href="#">Estado del Sistema</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column footer-subscribe">
+                    <h4>Suscríbete a Novedades Skyking</h4>
+                    <p style="font-size:0.9em; margin-bottom:10px;">Recibe las últimas noticias y ofertas de Skyking.</p>
+                    <form action="#">
+                        <input type="email" placeholder="Tu correo electrónico" required>
+                        <button type="submit">Suscribir</button>
+                    </form>
+                </div>
+            </div>
+            <div class="social-icons" style="margin-bottom: 25px;">
+                <a href="#" title="Facebook" aria-label="Facebook Skyking"><i class="fab fa-facebook-f" aria-hidden="true"></i></a> 
+                <a href="#" title="Twitter" aria-label="Twitter Skyking"><i class="fab fa-twitter" aria-hidden="true"></i></a> 
+                <a href="#" title="Instagram" aria-label="Instagram Skyking"><i class="fab fa-instagram" aria-hidden="true"></i></a> 
+                <a href="#" title="LinkedIn" aria-label="LinkedIn Skyking"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+            </div>
+            <div class="footer-bottom-links">
+                <a href="#">Política de Privacidad</a> | <a href="#">Términos de Servicio</a> | <a href="#">Mapa del Sitio</a>
+            </div>
+            <p class="copyright">&copy; 2025 Skyking. Entregas Inteligentes a tu Alcance.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

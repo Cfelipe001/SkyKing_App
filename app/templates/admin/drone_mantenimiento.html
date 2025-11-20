@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Mantenimiento de Drones - Skyking{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Estilos específicos para esta página si son necesarios */
+        .page-padding { padding-top: 30px; padding-bottom: 50px; }
+        .card { background-color: #1E1E1E; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom:25px; }
+        .card h2, .card h3 { color: #00D9C0; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;}
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #ccc; font-size:0.9em; }
+        .form-control, .form-select { /* .form-select es una clase común de Bootstrap para selects */
+            width: 100%; padding: 10px; border: 1px solid #444; 
+            border-radius: 4px; box-sizing: border-box; 
+            background-color: #2A2A2A; color: #E0E0E0; font-size: 1em; 
+        }
+        .btn-primary-custom { background-color: #00D9C0; color: #121212; border:none; padding: 10px 25px; border-radius:20px; font-weight:bold; cursor:pointer;}
+        .btn-primary-custom:hover { background-color: #00bfa5; }
+        .table { width: 100%; margin-bottom: 1rem; color: #E0E0E0; border-collapse: collapse; margin-top: 20px;}
+        .table th, .table td { padding: .85rem; vertical-align: top; border-top: 1px solid #444; text-align:left; font-size:0.9em;}
+        .table thead th { vertical-align: bottom; border-bottom: 2px solid #555; color: #00D9C0;}
+        .table tbody tr:hover { background-color: #2a2a2a; }
+        .row { display: flex; flex-wrap: wrap; margin-left: -10px; margin-right: -10px; } 
+        .col-md-6 { position: relative; width: 100%; padding-right: 10px; padding-left: 10px; margin-bottom: 15px;} 
+        @media (min-width: 768px) { .col-md-6 { flex: 0 0 50%; max-width: 50%; } }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver al Panel Admin</a>
+    <h1><i class="fas fa-tools"></i> Gestión de Mantenimiento de Drones</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid border_color ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <h3>Registrar Nuevo Evento de Mantenimiento</h3>
+        <form method="POST" action="{{ url_for('admin.manage_drone_maintenance') }}">
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="drone_id">Seleccionar Dron:</label>
+                    <select id="drone_id" name="drone_id" class="form-select" required>
+                        <option value="" disabled {% if not form_data.get('drone_id') %}selected{% endif %}>Selecciona un dron...</option>
+                        {% for drone in drones %} {# 'drones' es la lista pasada desde la ruta #}
+                        <option value="{{ drone.id }}" {% if form_data.get('drone_id')|int == drone.id %}selected{% endif %}>
+                            {{ drone.drone_identifier }} ({{ drone.model }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="service_date">Fecha del Servicio:</label>
+                    <input type="date" id="service_date" name="service_date" class="form-control" 
+                           value="{{ form_data.get('service_date', '') }}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="service_type">Tipo de Servicio:</label>
+                <select id="service_type" name="service_type" class="form-select" required>
+                    {# Valores deben coincidir con tu ENUM drone_service_type_enum #}
+                    {% set current_service_type = form_data.get('service_type', '') %}
+                    <option value="" disabled {% if not current_service_type %}selected{% endif %}>Selecciona un tipo...</option>
+                    <option value="rutina" {% if current_service_type == 'rutina' %}selected{% endif %}>Mantenimiento de Rutina</option>
+                    <option value="reparacion" {% if current_service_type == 'reparacion' %}selected{% endif %}>Reparación</option>
+                    <option value="revision_periodica" {% if current_service_type == 'revision_periodica' %}selected{% endif %}>Revisión Periódica</option>
+                    <option value="actualizacion_software" {% if current_service_type == 'actualizacion_software' %}selected{% endif %}>Actualización de Software</option>
+                    <option value="cambio_bateria" {% if current_service_type == 'cambio_bateria' %}selected{% endif %}>Cambio de Batería</option>
+                    <option value="otro" {% if current_service_type == 'otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Descripción del Trabajo Realizado:</label>
+                <textarea id="description" name="description" class="form-control" rows="3" required>{{ form_data.get('description', '') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="parts_replaced">Partes Reemplazadas (opcional):</label>
+                <input type="text" id="parts_replaced" name="parts_replaced" class="form-control" value="{{ form_data.get('parts_replaced', '') }}">
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="technician_name">Nombre del Técnico (opcional):</label>
+                    <input type="text" id="technician_name" name="technician_name" class="form-control" value="{{ form_data.get('technician_name', '') }}">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="cost">Costo del Servicio ($) (opcional):</label>
+                    <input type="number" step="0.01" min="0" id="cost" name="cost" class="form-control" value="{{ form_data.get('cost', '') }}">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary-custom">Registrar Mantenimiento</button>
+        </form>
+    </div>
+
+    <hr style="border-color: #444; margin-top: 30px; margin-bottom: 30px;">
+
+    <div class="card">
+        <h3>Historial de Mantenimiento</h3>
+        {% if logs %}
+        <div style="overflow-x:auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID Log</th>
+                        <th>Dron (ID - Modelo)</th>
+                        <th>Fecha Servicio</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Partes Reemplazadas</th>
+                        <th>Costo</th>
+                        <th>Técnico</th>
+                        <th>Fecha Registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log_entry in logs %} {# 'logs' es la lista pasada desde la ruta #}
+                    <tr>
+                        <td>{{ log_entry.id }}</td>
+                        <td>{{ log_entry.drone_identifier }} ({{ log_entry.drone_model }})</td>
+                        <td>{{ log_entry.service_date.strftime('%d/%m/%Y') if log_entry.service_date else 'N/A' }}</td>
+                        <td>{{ log_entry.service_type | replace('_', ' ') | capitalize }}</td>
+                        <td>{{ log_entry.description | truncate(100, true) }}</td>
+                        <td>{{ log_entry.parts_replaced | default('N/A') }}</td>
+                        <td>${{ "{:,.2f}".format(log_entry.cost) if log_entry.cost is not none else 'N/A' }}</td>
+                        <td>{{ log_entry.technician_name | default('N/A') }}</td>
+                        <td>{{ log_entry.created_at.strftime('%d/%m/%Y %H:%M') if log_entry.created_at else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No hay registros de mantenimiento todavía.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

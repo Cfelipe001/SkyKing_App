@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Skyking{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar"> <div class="container">
+                <a href="{{ url_for('home_page') }}" class="navbar-brand">Skyking</a>
+                <ul class="navbar-nav">
+                    {% if session.get('user_id') %}
+                        {% if session.get('user_role') == 'admin' %}
+                            <li><a href="{{ url_for('show_datos_dron_page') }}">Telemetría Dron</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('my_orders') }}">Mis Pedidos</a></li> 
+                        <li><a href="{{ url_for('list_restaurants') }}" {% if request.endpoint == 'list_restaurants' %}class="active"{% endif %}>Hacer Pedido</a></li>
+                        <li><a href="{{ url_for('user.mi_cuenta') }}" {% if request.endpoint == 'user.mi_cuenta' %}class="active"{% endif %}>Mi Perfil</a></li>
+                    {% else %}
+                        {% endif %}
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+                <div class="navbar-profile">
+                    {% if session.user_id %}
+                        <span style="color: #E0E0E0; margin-right: 15px;">Hola, {{ session.user_email | default('Usuario') }}</span>
+                        <a href="{{ url_for('logout_user_ajax') }}" class="navbar-nav-link" style="color: #E0E0E0; text-decoration: none; margin-right: 10px;" 
+                           onclick="event.preventDefault(); fetch(this.href, {method: 'POST'}).then(() => window.location.href='/home_page')">
+                           Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('show_login_page_auth') }}" class="profile-btn" title="Login/Registro">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container page-padding">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer> <div class="container">
+            <p>&copy; {{ now_utc().year }} Skyking. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html>

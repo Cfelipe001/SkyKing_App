@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Pedidos - Skyking{% endblock %}
+
+{% block content %}
+<div class="container page-padding"> {# Añadí page-padding aquí por consistencia, ajústalo si es necesario #}
+    <h1>Mis Pedidos</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;"> {# Div para espaciar los mensajes flash #}
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid  border_color ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if orders %}
+        <div class="list-group">
+            {% for order_item in orders %} {# Cambié 'order' a 'order_item' para ser más explícito que es un ítem de la lista 'orders' #}
+                <div class="list-group-item list-group-item-action flex-column align-items-start mb-3" 
+                     style="background-color: #1E1E1E; border: 1px solid #444; border-radius: 8px; color: #E0E0E0; padding: 15px;">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1" style="color: #00D9C0;">Pedido #{{ order_item.id }} - {{ order_item.restaurant_name }}</h5>
+                        <small>
+                            Fecha: 
+                            {% if order_item.ordered_at %}
+                                {{ order_item.ordered_at.strftime('%d/%m/%Y %I:%M %p') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </small>
+                    </div>
+                    <p class="mb-1">
+                        <strong>Estado:</strong> <span style="text-transform: capitalize;">{{ order_item.status | replace('_', ' ') }}</span><br>
+                        <strong>Total:</strong> ${{ "{:,.2f}".format(order_item.total_amount) }}<br>
+                        <strong>Tipo de Entrega:</strong> <span style="text-transform: capitalize;">{{ order_item.delivery_type | default('No especificado') }}</span>
+                    </p>
+                    <div style="margin-top: 10px;"> {# Div para el botón de rastreo #}
+                        <a href="{{ url_for('track_order_page', order_id=order_item.id) }}" class="btn btn-sm btn-info" style="background-color:#17a2b8; color:white; text-decoration:none; padding: 5px 10px; font-size:0.9em;">Rastrear este Pedido</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="lead">Aún no has realizado ningún pedido.</p>
+        <p><a href="{{ url_for('list_restaurants') }}" class="btn btn-primary" style="background-color: #00D9C0; color: #121212; border:none; text-decoration: none;">Explorar Restaurantes</a></p>
+        {# El enlace de rastrear ya no va aquí porque no hay 'order' definida #}
+    {% endif %}
+</div>
+{% endblock %}

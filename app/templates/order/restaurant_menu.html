@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name | default('Menú') }} - Skyking{% endblock %}
+
+{% block content %}
+<div class="container">
+    {# Tu bloque de mensajes flash empieza aquí #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="background-color: #333; color: #fff; padding: 10px; margin-bottom:15px; border-left: 5px solid #00D9C0;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <a href="{{ url_for('list_restaurants') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0;">&laquo; Volver a Restaurantes</a>
+
+    <h1>Menú de: {{ restaurant.name }}</h1>
+    {% if restaurant.description %}
+        <p class="lead" style="text-align: center; margin-bottom: 30px;">{{ restaurant.description }}</p>
+    {% endif %}
+
+    {% if menu_items %}
+        <div class="grid-listings"> 
+            {% for item in menu_items %}
+                <div class="card listing-item" style="height: 100%;"> 
+                   {% if item.image_url %}
+                    {# item.image_url aquí es la ruta relativa como 'uploads/menu_item_images/nombre_unico.jpg' #}
+                    <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.name }}" class="listing-img">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder_menu_item.jpg') }}" alt="{{ item.name }}" class="listing-img">
+                {% endif %}
+                    <div class="card-body d-flex flex-column"> <h3>{{ item.name }}</h3>
+                        <p>{{ item.description | default('Descripción no disponible.') }}</p>
+                        <p style="font-size: 1.2em; color: #00D9C0; font-weight: bold;">Precio: ${{ "{:,.2f}".format(item.price) }}</p>
+                        
+                        <form action="{{ url_for('add_to_cart', menu_item_id=item.id) }}" method="POST" class="mt-auto">
+                            <input type="hidden" name="restaurant_id_for_redirect" value="{{ restaurant.id }}">
+                            <div class="form-group d-flex align-items-center mb-2">
+                                <label for="quantity-{{ item.id }}" class="mr-2" style="margin-right: 10px;">Cantidad:</label>
+                                <input type="number" name="quantity" id="quantity-{{ item.id }}" value="1" min="1" max="10" class="form-control form-control-sm" style="width: 70px; background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">
+                            </div>
+                            <button type="submit" class="btn btn-view-menu btn-block"> Añadir al Carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center;">Este restaurante no tiene ítems en el menú disponibles en este momento.</p>
+    {% endif %}
+
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    <div style="text-align: center;">
+        <a href="{{ url_for('view_cart') }}" class="btn btn-info btn-lg">Ver Carrito</a>
+    </div>
+
+</div> {# Cierre del div.container principal del contenido #}
+{% endblock %}

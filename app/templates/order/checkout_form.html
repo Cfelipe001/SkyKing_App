@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Pedido de {{ restaurant_being_checked_out.name }} - Skyking{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Confirmar y Pagar Pedido</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="background-color: #333; color: #fff; padding: 10px; margin-bottom:15px; border-left: 5px solid #00D9C0;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card mb-4" style="background-color: #1E1E1E; border-radius: 8px; padding: 20px;">
+                <h3 style="border-bottom: 1px solid #444; padding-bottom:10px; margin-bottom:15px;">Tu pedido de: {{ restaurant_being_checked_out.name }}</h3>
+                <ul class="list-group list-group-flush" style="background-color: transparent;">
+                    {% for item in items_to_checkout %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; color: #E0E0E0; border-color: #444;">
+                        <div>
+                            {{ item.quantity }} x {{ item.name }}
+                        </div>
+                        <span>${{ "{:,.2f}".format(item.subtotal) }}</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center font-weight-bold" style="background-color: transparent; color: #FFFFFF; border-color: #444; font-size: 1.2em;">
+                        <strong>Total para este restaurante:</strong>
+                        <strong>${{ "{:,.2f}".format(total_checkout_amount) }}</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card" style="background-color: #1E1E1E; border-radius: 8px; padding: 20px;">
+                <h3>Detalles de Entrega y Pago</h3>
+                <form method="POST" action="{{ url_for('checkout') }}">
+                    <input type="hidden" name="restaurant_id_for_checkout" value="{{ restaurant_being_checked_out.id }}">
+
+                    <div class="form-group mb-3">
+                        <label for="delivery_address" style="color: #E0E0E0;">Dirección de Entrega Completa:</label>
+                        <input type="text" class="form-control" id="delivery_address" name="delivery_address" required 
+                               style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="notes" style="color: #E0E0E0;">Notas Adicionales para el Restaurante (opcional):</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
+                                  style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;"></textarea>
+                    </div>
+                    
+                    <p style="color: #A0A0A0;">Método de pago: Contra entrega (por ahora).</p>
+                    
+
+                
+
+                    <div class="form-group mb-3">
+                        <label style="color: #E0E0E0; display: block; margin-bottom: 0.5rem;">Selecciona el Tipo de Entrega:</label>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons" style="display: flex; gap: 10px;">
+                            <label class="btn btn-outline-secondary" style="color:#00D9C0; border-color:#00D9C0; flex-grow: 1;">
+                                <input type="radio" name="delivery_type" id="delivery_drone" value="drone" required> Dron 
+                            </label>
+                            <label class="btn btn-outline-secondary active" style="color:#00D9C0; border-color:#00D9C0; flex-grow: 1;">
+                                {# Marcamos motocicleta como opción por defecto con la clase 'active' y 'checked' #}
+                                <input type="radio" name="delivery_type" id="delivery_motorcycle" value="motorcycle" required checked> Motocicleta
+                            </label>
+                            <label class="btn btn-outline-secondary" style="color:#00D9C0; border-color:#00D9C0; flex-grow: 1;">
+                                <input type="radio" name="delivery_type" id="delivery_bicycle" value="bicycle" required> Bicicleta 
+                            </label>
+                        </div>
+                    </div>
+
+                    <p style="color: #A0A0A0;">Método de pago: Contra entrega (por ahora).</p> {# Esto se mantiene como antes #}
+
+                    <button type="submit" class="btn btn-success btn-lg btn-block" style="background-color: #00D9C0; color: #121212; border:none;">
+                        Realizar Pedido (${{ "{:,.2f}".format(total_checkout_amount) }})
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card" style="background-color: #1E1E1E; border-radius: 8px; padding: 20px;">
+                <h4>Resumen General del Carrito</h4>
+                <p>Si tienes ítems de otros restaurantes en tu carrito, podrás procesarlos después.</p>
+                <a href="{{ url_for('view_cart') }}" class="btn btn-outline-info btn-sm">Volver al Carrito Completo</a>
+                <hr>
+                <p>Total de todos los ítems en el carrito: ${{ "{:,.2f}".format(session.get('cart_total_debug', 0)) }}</p>
+                {# Para el session.get('cart_total_debug', 0) necesitarías calcular y guardar el total general del carrito en la sesión
+                   en la función view_cart, por ejemplo: session['cart_total_debug'] = total_cart_amount #}
+            </div>
+        </div>
+    </div>
+    <br>
+    <a href="{{ url_for('view_cart') }}" class="btn btn-outline-secondary" style="color:#00D9C0; border-color:#00D9C0;">&laquo; Cancelar y Volver al Carrito</a>
+</div>
+{% endblock %}

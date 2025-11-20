@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración - Skyking{% endblock %}
+
+{% block head_extra %}
+    {# Enlace a Font Awesome si no lo tienes en tu base.html y quieres usar los iconos #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA EL DASHBOARD DE ADMIN */
+        /* Estos estilos son para el layout y apariencia de las tarjetas del dashboard. */
+        /* Los estilos generales (body, container, navbar, footer) deberían venir de main_style.css vía base.html */
+
+        /* Si tu main_style.css ya tiene .page-padding, .welcome-message, puedes quitar estas de aquí */
+        /* O ajustar para que no haya conflicto */
+        .admin-dashboard-h1 { /* Clase específica para el h1 de este dashboard si necesitas diferenciarlo */
+            font-size: 2.2em; 
+            color: #FFFFFF; 
+            margin-bottom: 10px; 
+            text-align: center; 
+            font-weight: 600; 
+        }
+        .admin-welcome-message { 
+            text-align:center; 
+            margin-bottom: 30px; 
+            font-size: 1.2em; 
+            color: #A0A0A0;
+        }
+        
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; /* Aumentado el gap un poco */
+            margin-bottom: 30px; 
+        }
+        .dashboard-card { 
+            background-color: #1E1E1E; 
+            padding: 25px; /* Aumentado el padding */
+            border-radius: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Sombra un poco más pronunciada */
+        }
+        .dashboard-card h2 { 
+            font-size: 1.5em; /* Un poco más grande */
+            color: #00D9C0; 
+            margin-top: 0; /* Quitar margen superior si no es necesario */
+            margin-bottom: 18px; /* Más espacio debajo del título de la tarjeta */
+            border-bottom: 1px solid #333; 
+            padding-bottom: 12px;
+        }
+        .dashboard-card h2 i { /* Estilo para iconos en los títulos de las tarjetas */
+            margin-right: 10px;
+        }
+        .dashboard-card p { 
+            margin-bottom: 10px; 
+            font-size: 0.95em; 
+            line-height: 1.5;
+        }
+        .dashboard-card ul { 
+            list-style: none; 
+            padding-left: 0; 
+            margin-bottom: 0; /* Quitar margen inferior de la lista si es el último elemento */
+        }
+        .dashboard-card ul li { 
+            background-color: #2A2A2A; 
+            padding: 10px 15px; /* Ajuste de padding */
+            margin-bottom: 8px; 
+            border-radius: 4px; 
+            border-left: 4px solid #00D9C0; /* Borde izquierdo más grueso */
+            font-size: 0.9em;
+        }
+        .dashboard-card ul li strong { 
+            color: #FFFFFF; 
+        }
+        .dashboard-card .placeholder-chart { 
+            background-color: #2A2A2A; 
+            border: 1px dashed #444; 
+            height: 180px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #666; 
+            border-radius: 4px; 
+            font-size: 0.9em;
+        }
+        
+        .quick-actions .btn { 
+            display: block; 
+            width: 100%; 
+            text-align: left; 
+            background-color: #2A2A2A; 
+            color: #E0E0E0; 
+            padding: 12px 15px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            text-decoration:none; 
+            border: 1px solid #444; 
+            font-size: 1em; /* Ligeramente más grande */
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .quick-actions .btn:hover { 
+            background-color: #00D9C0; /* Cambio de fondo al pasar el mouse */
+            border-color: #00D9C0; 
+            color: #121212; /* Texto oscuro para contraste */
+        }
+        .quick-actions .btn:hover i {
+            color: #121212; /* Icono también cambia de color */
+        }
+        .quick-actions .btn i { 
+            margin-right: 10px; 
+            color: #00D9C0; 
+            width:18px; /* Icono un poco más grande */
+            text-align:center; 
+            transition: color 0.2s ease;
+        }
+
+        .data-highlight { 
+            font-size: 2em; /* Más grande */
+            font-weight: 700; /* Más grueso */
+            color: #FFFFFF; 
+            display:block; 
+            margin-bottom:5px;
+        }
+        /* Asegúrate que la clase page-padding esté definida en tu main_style.css o aquí si no usas base.html */
+        .page-padding { 
+            padding-top: 30px; 
+            padding-bottom: 50px; 
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <h1 class="admin-dashboard-h1">Panel de Administración Skyking</h1>
+    <p class="admin-welcome-message">Visión general del sistema y herramientas de gestión.</p>
+
+    {# Aquí puedes poner el contenido del dashboard admin que te di antes #}
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <h2><i class="fas fa-chart-pie"></i> Resumen del Sistema</h2>
+            <p><span class="data-highlight">150</span> Usuarios Registrados (Ejemplo)</p>
+            <p><span class="data-highlight">4</span> Drones Operativos (Ejemplo)</p>
+            <p><span class="data-highlight">35</span> Pedidos Hoy (Ejemplo)</p>
+            <p><span class="data-highlight">5</span> Entregas en Curso (Ejemplo)</p>
+        </div>
+
+        <div class="dashboard-card quick-actions">
+            <h2><i class="fas fa-cogs"></i> Acciones de Gestión</h2>
+            {# Cuando implementes estas rutas en admin_bp, usarás url_for() #}
+            {# Ej: <a href="{{ url_for('admin.register_new_user_by_admin') }}" class="btn">...</a> #}
+            <a href="{{ url_for('admin.register_new_user_by_admin') }}" class="btn"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</a>
+            <a href="{{ url_for('admin.add_new_drone_by_admin') }}" class="btn"><i class="fas fa-plus-circle"></i> Agregar Nuevo Dron</a>
+            <a href="{{ url_for('admin.view_all_system_orders') }}" class="btn"><i class="fas fa-tasks"></i> Ver Todos los Pedidos</a>
+            <a href="{{ url_for('admin.manage_drone_maintenance') }}" class="btn"><i class="fas fa-tools"></i> Ir a Mantenimiento Drones</a>
+            <a href="#" class="btn"><i class="fas fa-file-alt"></i> Ver Reportes</a>
+            <a href="{{ url_for('admin.manage_users_list') }}" class="btn"><i class="fas fa-users"></i> Gestionar Usuarios</a>
+            <a href="{{ url_for('admin.manage_drones_list') }}" class="btn"><i class="fas fa-helicopter"></i> Gestionar Drones</a>
+        </div>
+        
+        <div class="dashboard-card" style="grid-column: span 2;"> {/* Ocupa dos columnas si hay espacio */}
+            <h2><i class="fas fa-bell"></i> Alertas y Notificaciones del Sistema</h2>
+            <ul>
+                <li><strong>ALERTA:</strong> Dron SKY003 reporta batería baja (15%).</li>
+                <li><strong>INFO:</strong> Mantenimiento programado para Dron SKY001 mañana.</li>
+                <li><strong>AVISO:</strong> Alta demanda de pedidos en Zona Norte.</li>
+                <li><strong>NUEVO:</strong> Usuario 'restaurante_nuevo@example.com' pendiente de aprobación.</li>
+            </ul>
+        </div>
+
+        <div class="dashboard-card">
+            <h2><i class="fas fa-users"></i> Actividad de Usuarios</h2>
+            <div class="placeholder-chart">
+                <p>(Gráfica: Nuevos usuarios / Usuarios activos)</p>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <h2><i class="fas fa-shipping-fast"></i> Rendimiento de Entregas</h2>
+            <div class="placeholder-chart">
+                <p>(Gráfica: Entregas completadas vs. Tiempo promedio)</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

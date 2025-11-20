@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Dashboard - Skyking</title>
+    <style>
+        /* --- Reseteo Básico y Fuentes --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #121212; color: #E0E0E0; line-height: 1.6; display: flex; flex-direction: column; align-items: center; padding-top: 0; padding-bottom: 20px; min-height: 100vh;}
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        .page-padding { padding-top: 30px; padding-bottom: 50px; }
+        
+        /* --- Navbar (Admin) --- */
+        .navbar { background-color: #1E1E1E; padding: 15px 0; border-bottom: 1px solid #333; box-shadow: 0 2px 5px rgba(0,0,0,0.2); width: 100%; margin-bottom: 30px; position: sticky; top:0; z-index: 1000;}
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.8em; font-weight: 700; color: #00D9C0; text-decoration: none; }
+        .navbar-nav { list-style: none; display: flex; }
+        .navbar-nav li { margin-left: 20px; } /* Espacio reducido para más opciones */
+        .navbar-nav li a { color: #E0E0E0; text-decoration: none; font-size: 0.95em; font-weight: 500; transition: color 0.3s ease; }
+        .navbar-nav li a:hover, .navbar-nav li a.active { color: #00D9C0; }
+        .profile-info { color: #E0E0E0; margin-right: 15px; }
+
+        /* --- Estilos del Dashboard Admin --- */
+        h1 { font-size: 2.2em; color: #FFFFFF; margin-bottom: 10px; text-align: center; font-weight: 600; }
+        .welcome-message { text-align:center; margin-bottom: 30px; font-size: 1.2em; color: #A0A0A0;}
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .dashboard-card { background-color: #1E1E1E; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .dashboard-card h2 { font-size: 1.4em; color: #00D9C0; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        .dashboard-card p { margin-bottom: 8px; font-size: 0.9em; }
+        .dashboard-card ul { list-style: none; padding-left: 0; }
+        .dashboard-card ul li { background-color: #2A2A2A; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid #00D9C0; font-size: 0.85em;}
+        .dashboard-card ul li strong { color: #FFFFFF; }
+        .dashboard-card .placeholder-chart { background-color: #2A2A2A; border: 1px dashed #444; height: 180px; display: flex; align-items: center; justify-content: center; color: #666; border-radius: 4px; font-size: 0.9em;}
+        
+        .quick-actions .btn { display: block; width: 100%; text-align: left; background-color: #2A2A2A; color: #E0E0E0; padding: 10px 15px; margin-bottom: 8px; border-radius: 5px; text-decoration:none; border: 1px solid #444; font-size: 0.9em;}
+        .quick-actions .btn:hover { background-color: #3f3f3f; border-color: #00D9C0; }
+        .quick-actions .btn i { margin-right: 8px; color: #00D9C0; width:16px; text-align:center; }
+
+        .data-highlight { font-size: 1.8em; font-weight: 600; color: #FFFFFF; display:block; margin-bottom:5px;}
+
+        footer { background-color: #1E1E1E; color: #A0A0A0; text-align: center; padding: 25px 0; margin-top: auto; border-top: 1px solid #333; width:100%;}
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand">Skyking</a>
+            <ul class="navbar-nav">
+                <li><a href="#" class="active">Mi Actividad</a></li>
+                <li><a href="{{ url_for('list_restaurants') }}">Hacer Pedido</a></li>
+                <li><a href="{{ url_for('my_orders') }}">Mis Pedidos</a></li>
+                <li><a href="{{ url_for('support_page') }}">Contacto</a></li>
+            </ul>
+            <div class="navbar-profile">
+                <span class="profile-info">Hola, Cliente Ejemplo</span>
+                <a href="mi_perfil.html" title="Mi Perfil" style="margin-right:15px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
+                <a href="#" title="Logout" style="text-decoration:none; color:#E0E0E0;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container page-padding">
+        <h1>Bienvenido de Nuevo, Cliente Ejemplo</h1>
+        <p class="welcome-message">Gestiona tus pedidos y seguimiento fácilmente.</p>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card quick-actions">
+                <h2><i class="fas fa-rocket"></i> ¿Qué quieres hacer?</h2>
+                <a href="#" class="btn"><i class="fas fa-motorcycle"></i> Hacer un Nuevo Pedido</a>
+                <a href="#" class="btn"><i class="fas fa-history"></i> Ver Mis Pedidos</a>
+                <a href="#" class="btn"><i class="fas fa-user-circle"></i> Ir a Mi Perfil</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h2><i class="fas fa-star"></i> Mis Puntos Skyking</h2>
+                <p>Puntos Acumulados: <span class="data-highlight">150 Puntos</span></p>
+                <p><small>Canjea tus puntos por descuentos y envíos gratis.</small></p>
+            </div>
+
+            <div class="dashboard-card" style="grid-column: span 2;">
+                <h2><i class="fas fa-bell"></i> Notificaciones y Alertas de Pedidos</h2>
+                <ul>
+                    <li><strong>Actualización:</strong> Tu pedido #P12345 para Pizzas Daniel está en camino. <a href="#" style="color:#00D9C0;">Rastrear ahora</a>. (Hace 5 min)</li>
+                    <li><strong>Promoción:</strong> ¡20% de descuento en Hamburguesas El Corralito esta semana! (Hace 2 horas)</li>
+                    <li><strong>Entregado:</strong> Tu pedido #P12301 fue entregado. ¡Gracias por tu compra! (Ayer)</li>
+                </ul>
+            </div>
+            
+            <div class="dashboard-card">
+                <h2><i class="fas fa-search-location"></i> Rastrear un Pedido</h2>
+                 <form action="#" method="GET" class="form-inline-track">
+                    <input type="text" name="order_id_track_user" placeholder="Ingresa ID del Pedido">
+                    <button type="submit">Rastrear</button>
+                </form>
+            </div>
+            <div class="dashboard-card">
+                <h2><i class="fas fa-parachute-box"></i> Drones en tu Zona</h2>
+                <div class="placeholder-graphic">
+                    <p>(Aquí podría ir un mini-mapa o info sobre disponibilidad de drones)</p>
+                    <p>3 drones activos cerca de ti.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Skyking. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>

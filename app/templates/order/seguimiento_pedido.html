@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Seguimiento de Pedido #{{ order.id }} - Skyking{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+         crossorigin=""/>
+    <style>
+        #trackingMap { height: 400px; width: 100%; border-radius: 8px; margin-bottom: 20px;}
+        .tracking-details p { margin-bottom: 0.5rem; font-size: 1.1em;}
+        .tracking-details strong { color: #00D9C0; } /* Color de acento */
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Seguimiento de Pedido #{{ order.id }}</h1>
+    <p class="lead">Restaurante: <strong>{{ tracking.restaurant_name }}</strong></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-7">
+            <div id="trackingMap"></div>
+        </div>
+        <div class="col-md-5 tracking-details">
+            <div class="card" style="background-color: #1E1E1E; padding: 20px; border-radius: 8px;">
+                <h3>Detalles de la Entrega:</h3>
+                <p><strong>Tipo de Entrega:</strong> <span style="text-transform: capitalize;">{{ tracking.delivery_type | replace('_', ' ') }}</span></p>
+                <p><strong>Entregado por:</strong> {{ tracking.delivery_entity_name }}</p>
+                {% if tracking.delivery_type != 'drone' and tracking.delivery_entity_contact and tracking.delivery_entity_contact != 'No disponible' %}
+                    <p><strong>Contacto Repartidor:</strong> {{ tracking.delivery_entity_contact }}</p>
+                {% endif %}
+                <p><strong>Velocidad Actual:</strong> {{ tracking.current_speed }}</p>
+                <p><strong>Estado del Pedido:</strong> <span style="text-transform: capitalize;">{{ tracking.status | replace('_', ' ') }}</span></p>
+                <hr style="border-color: #444;">
+                <p><strong>Dirección de Entrega:</strong><br>{{ order.delivery_address }}</p>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('my_orders') }}" class="btn btn-outline-secondary" style="color:#00D9C0; border-color:#00D9C0;">&laquo; Volver a Mis Pedidos</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+         crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Usamos las coordenadas pasadas desde Flask (centro de Bucaramanga por ahora)
+            var mapLat = 7.1193; 
+            var mapLon = -73.1228; 
+            var mapZoom = 15;
+            if (typeof L !== 'undefined') { // Verificar que Leaflet haya cargado
+                var map = L.map('trackingMap').setView([mapLat, mapLon], mapZoom);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Marcador inicial (punto de partida)
+                L.marker([mapLat, mapLon]).addTo(map)
+                    .bindPopup('Punto de partida/Ubicación actual (simulada).')
+                    .openPopup();
+                
+                // Aquí es donde más adelante añadiríamos la lógica para actualizar el marcador
+                // con datos en tiempo real (AJAX o WebSockets).
+            } else {
+                console.error("Leaflet no está cargado. El mapa no se mostrará.");
+                document.getElementById('trackingMap').innerHTML = '<p style=\\"color:red;text-align:center;\\">No se pudo cargar el mapa.</p>';
+            }
+        });
+    </script>
+{% endblock %}

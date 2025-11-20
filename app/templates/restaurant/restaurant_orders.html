@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Pedidos de {{ restaurant.name }} - Skyking{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .page-padding { 
+            padding-top: 30px; 
+            padding-bottom: 50px; 
+        }
+        .card { 
+            background-color: #1E1E1E; 
+            padding: 20px 25px;
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            margin-bottom:25px; 
+        }
+        .card h1, .card h2 { /* Ajustado para que h1 también tome este estilo si está en la card */
+            color: #00D9C0; 
+            margin-top: 0;
+            margin-bottom: 15px; 
+            border-bottom: 1px solid #444; 
+            padding-bottom: 10px;
+        }
+         .table { 
+            width: 100%; 
+            margin-bottom: 1rem; 
+            color: #E0E0E0; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+        }
+        .table th, .table td { 
+            padding: .85rem; 
+            vertical-align: middle; /* Centrado verticalmente */
+            border-top: 1px solid #333; 
+            text-align:left; 
+            font-size:0.9em; 
+        }
+        .table thead th { 
+            vertical-align: bottom; 
+            border-bottom: 2px solid #555; 
+            color: #00D9C0;
+            font-weight: 600;
+        }
+        .table tbody tr:hover { 
+            background-color: #2a2a2a; 
+        }
+        .action-form-inline {
+            display: flex; /* Para alinear select y botón */
+            align-items: center;
+            gap: 5px; /* Espacio entre select y botón */
+        }
+        .action-form-inline select {
+            background-color: #2A2A2A; 
+            color: #E0E0E0; 
+            border: 1px solid #444; 
+            padding: 5px 8px; 
+            font-size:0.85em; 
+            border-radius: 4px;
+            flex-grow: 1; /* Para que el select tome el espacio disponible */
+        }
+        .btn-update-status { /* Clase específica para el botón de actualizar estado */
+            background-color:#007bff; 
+            color:white; 
+            border:none; 
+            padding: 5px 10px; 
+            font-size:0.85em; 
+            border-radius:4px;
+            cursor:pointer;
+            white-space: nowrap; /* Para que no se parta el texto del botón */
+        }
+        .btn-update-status:hover { background-color:#0056b3; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver al Panel</a>
+    
+    <h1><i class="fas fa-clipboard-list" style="margin-right:10px;"></i>Pedidos Recibidos en: {{ restaurant.name }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {# Aquí podrías añadir filtros por estado, fecha, etc. más adelante #}
+
+    {% if orders %}
+        <div class="card">
+            <h2 style="font-size: 1.6em;">Lista de Pedidos</h2> {# Título dentro de la card #}
+            <div style="overflow-x:auto;"> {# Para hacer la tabla responsive si tiene muchas columnas #}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Cliente</th>
+                            <th>Ítems (Resumen)</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado Actual</th>
+                            <th style="min-width: 220px;">Actualizar Estado</th> {# Ancho mínimo para el form #}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order_item in orders %} {# Renombré 'order' a 'order_item' para claridad en el bucle #}
+                        <tr>
+                            <td>#{{ order_item.id }}</td>
+                            <td>{{ order_item.customer_name | default(order_item.customer_email) }}</td>
+                            <td>{{ order_item.item_summary | default('No disponible') | truncate(50, true) }}</td> {# item_summary que habíamos añadido #}
+                            <td>
+                                {% if order_item.ordered_at %}
+                                    {{ order_item.ordered_at.strftime('%d/%m/%Y %I:%M %p') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>${{ "{:,.2f}".format(order_item.total_amount) }}</td>
+                            <td><span style="text-transform: capitalize; font-weight:bold;">{{ order_item.status | replace('_', ' ') }}</span></td>
+                            <td>
+                                <form action="{{ url_for('restaurant.update_restaurant_order_status', restaurant_id=restaurant.id, order_id=order_item.id) }}" method="POST" class="action-form-inline">
+                                    <select name="new_status" class="form-select">
+                                        {# 'possible_statuses' es la lista pasada desde la ruta Flask #}
+                                        {% for status_option in possible_statuses %}
+                                            <option value="{{ status_option }}" {% if status_option == order_item.status %}selected{% endif %}>
+                                                {{ status_option.replace('_', ' ') | capitalize }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn-update-status">Actualizar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert" style="background-color: #333; color: #fff; padding: 15px; border-left: 5px solid #17a2b8; border-radius: 4px;">
+            No hay pedidos para mostrar para este restaurante.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

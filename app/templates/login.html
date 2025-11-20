@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - DJI DeliveryHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column; /* Para el header opcional */
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Header simple opcional */
+        .simple-header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .simple-header a img {
+            height: 30px; /* Ajusta según tu logo */
+        }
+
+        .login-container {
+            background-color: #1a1a1a; /* Un gris oscuro, no negro puro */
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-top: 80px; /* Espacio para el header si lo usas */
+        }
+
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #fff;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: #fff;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .login-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px; /* Más redondeado como los botones del hero */
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+
+        .extra-links {
+            margin-top: 25px;
+            font-size: 0.9em;
+        }
+
+        .extra-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .extra-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Para mensajes de error/éxito */
+        #message-container {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: none; /* Oculto por defecto */
+        }
+        #message-container.success {
+            background-color: rgba(40, 167, 69, 0.2); /* Verde con opacidad */
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+        #message-container.error {
+            background-color: rgba(220, 53, 69, 0.2); /* Rojo con opacidad */
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="simple-header">
+        <a href="{{ url_for('show_register_page_auth') }}"> 
+        </a>
+    </header>
+
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="button" class="login-button" onclick="handleLogin()">Ingresar</button>
+        </form>
+        <div id="message-container"></div>
+        <div class="extra-links">
+            <a href="#">¿Olvidaste tu contraseña?</a>
+            <span>|</span>
+            <a href="{{ url_for('show_register_page_auth') }}">¿No tienes cuenta? Regístrate</a>
+            </div>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            console.log("Función handleLogin INVOCADA"); // LOG 1
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageContainer = document.getElementById('message-container');
+
+            messageContainer.style.display = 'none'; // Ocultar mensajes previos
+            messageContainer.textContent = '';
+            messageContainer.className = '';
+
+
+            if (!email || !password) {
+                showMessage('Por favor, ingresa correo y contraseña.', 'error');
+                return;
+            }
+            console.log("Antes de llamar a fetch. Email:", email); // LOG 2
+            try {
+                const response = await fetch('/login_ajax', { // La URL de tu endpoint Flask para login
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                console.log("Respuesta fetch recibida, status:", response.status); // LOG 3
+                const result = await response.json();
+                console.log("Respuesta completa del servidor (result):", result); // LOG 4
+                console.log("Valor de result.redirect_url en JavaScript:", result.redirect_url); // LOG 5
+
+                if (response.ok) { // status 200-299
+                    showMessage(result.message || '¡Inicio de sesión exitoso!', 'success');
+                    // Aquí podrías redirigir al usuario, por ejemplo:
+                    // window.location.href = '/dashboard'; // O la página a la que deba ir después del login
+                    if (result.redirect_url) {
+                        console.log("JavaScript INTENTARÁ redirigir a:", result.redirect_url); // LOG 6
+                        window.location.href = result.redirect_url;
+                    } else {
+                         // Opcional: redirigir a la página de inicio si no hay otra URL
+                            console.log("result.redirect_url está vacío o es 'falsy'. Redirigiendo a fallback (home_page)."); // DEBUG
+                            window.location.href = "{{ url_for('home_page') }}";
+                        }
+                } else {
+                    console.log("response.ok es false. Error del servidor:", result); // LOG 8
+                    showMessage(result.error || 'Error en el inicio de sesión.', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error en la solicitud de login:', error);
+                showMessage('Ocurrió un error al intentar iniciar sesión. Revisa la consola.', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.textContent = message;
+            messageContainer.className = type; // 'success' o 'error'
+            messageContainer.style.display = 'block';
+        }
+
+        // Opcional: permitir envío con Enter en el campo de contraseña
+        document.getElementById('password').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevenir el envío tradicional del formulario
+                handleLogin();
+            }
+        });
+    </script>
+
+</body>
+</html>

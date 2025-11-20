@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Información de {{ restaurant.name | default('Restaurante') }} - Skyking{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver al Panel</a>
+
+    <h1>Editar Información de: {{ restaurant.name | default('tu Restaurante') }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} 
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid  border_color ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card" style="background-color: #1E1E1E; padding: 25px; border-radius: 8px; max-width: 700px; margin: 0 auto;">
+        {# El action vacío envía el formulario a la URL actual, que es la ruta de edición #}
+        <form method="POST" action="{{ url_for('restaurant.edit_restaurant_info', restaurant_id=restaurant.id) }}" enctype="multipart/form-data"> 
+
+            <div class="form-group mb-3">
+                <label for="restaurant_logo_image">Imagen Principal / Logo del Restaurante (opcional):</label>
+                {% if restaurant.logo_image_url %}
+                    <div style="margin-bottom: 10px;">
+                        <p style="font-size: 0.9em; color: #A0A0A0;">Imagen actual:</p>
+                        <img src="{{ url_for('static', filename=restaurant.logo_image_url) }}" alt="Logo de {{ restaurant.name }}" style="max-height: 100px; max-width: 200px; border-radius: 4px; border: 1px solid #444;">
+                        <p style="font-size: 0.8em; color: #A0A0A0; margin-top:5px;">Sube una nueva imagen para reemplazarla.</p>
+                    </div>
+                {% endif %}
+                <input type="file" class="form-control-file" id="restaurant_logo_image" name="restaurant_logo_image" accept="image/png, image/jpeg, image/gif">
+                    style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444; padding: 10px;">
+                <small style="color: #A0A0A0; font-size: 0.85em;">Archivos permitidos: .png, .jpg, .jpeg, .gif.</small>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="name">Nombre del Restaurante:</label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       value="{{ restaurant.get('name', '') }}" required
+                       style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="description">Descripción:</label>
+                <textarea class="form-control" id="description" name="description" rows="4"
+                          style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">{{ restaurant.get('description', '') }}</textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="address">Dirección:</label>
+                <input type="text" class="form-control" id="address" name="address" 
+                       value="{{ restaurant.get('address', '') }}"
+                       style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="phone_number">Número de Teléfono:</label>
+                <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                       value="{{ restaurant.get('phone_number', '') }}"
+                       style="background-color: #2A2A2A; color: #E0E0E0; border: 1px solid #444;">
+            </div>
+
+            <div class="form-group form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                       {% if restaurant.get(is_active, true) %}checked{% endif %}
+                       style="margin-top: 5px;">
+                <label class="form-check-label" for="is_active" style="color: #ccc; font-weight:normal;">Restaurante Activo (acepta pedidos)</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom" style="background-color: #00D9C0; color: #121212; border:none; padding: 12px 30px; font-weight: 600;">
+                Guardar Cambios
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

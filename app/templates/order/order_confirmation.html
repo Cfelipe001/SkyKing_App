@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmación de Pedido - Skyking{% endblock %}
+
+{% block content %}
+<div class="container text-center"> {# text-center para centrar el contenido #}
+    <h1>¡Gracias por tu Pedido!</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" style="background-color: #333; color: #fff; padding: 10px; margin-bottom:15px; border-left: 5px solid #00D9C0;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <p class="lead">Tu pedido con el número <strong>#{{ order_id }}</strong> ha sido recibido y está siendo procesado.</p>
+    <p>Recibirás notificaciones sobre el estado de tu entrega.</p>
+    <hr>
+    <p>
+        <a href="{{ url_for('list_restaurants') }}" class="btn btn-primary" style="background-color: #00D9C0; color: #121212; border:none;">Hacer Otro Pedido</a>
+        <a href="{{ url_for('my_orders') }}" class="btn btn-outline-secondary" style="color:#00D9C0; border-color:#00D9C0;">Ver Mis Pedidos</a>
+        <a href="{{ url_for('track_order_page', order_id=order_id) }}" class="btn btn-info">Rastrear este Pedido</a>
+    </p>
+
+</div>
+{% endblock %}

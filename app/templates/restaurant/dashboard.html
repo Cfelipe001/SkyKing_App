@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de {{ restaurants[0].name if restaurants else 'Restaurante' }} - Skyking{% endblock %}
+
+{% block head_extra %}
+    {# Enlace a Font Awesome si lo usas para iconos en el dashboard #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA ESTE DASHBOARD */
+        .page-padding { 
+            padding-top: 30px; 
+            padding-bottom: 50px; 
+        }
+        /* Si 'lead' no está en tu main_style.css, puedes definirlo aquí */
+        .lead { 
+            text-align:center; 
+            margin-bottom: 20px; 
+            font-size: 1.1em; 
+            color: #A0A0A0;
+        }
+        .card { /* Estilo base para las tarjetas en este dashboard */
+            background-color: #1E1E1E; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            margin-bottom: 25px; /* Espacio entre tarjetas si hay varias */
+        }
+        .card h2 { /* Para el nombre del restaurante */
+            font-size: 1.8em; /* Más grande */
+            color: #00D9C0; 
+            margin-top: 0; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444; 
+        }
+        .card h4 { /* Para "Acciones para..." */
+            font-size: 1.3em; 
+            color: #E0E0E0; 
+            margin-top:15px; 
+            margin-bottom:10px;
+            font-weight: 600;
+        }
+        .card p { 
+            margin-bottom: 0.8rem; 
+            line-height: 1.6;
+        }
+        .card p strong { 
+            color: #ccc; 
+            min-width: 80px; /* Para alinear un poco los "labels" */
+            display: inline-block;
+        }
+        .btn-primary, .btn-info, .btn-secondary { /* Estilos para los botones de acción */
+            font-size: 0.95em; 
+            padding: 10px 18px; 
+            border-radius: 20px;
+            text-decoration: none;
+            margin-right: 10px;
+            margin-bottom: 10px; /* Por si se apilan en móvil */
+            border: none;
+            color: white;
+            display: inline-block; /* Para que respeten el margin-right */
+            transition: opacity 0.2s ease;
+        }
+        .btn-primary { background-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; opacity:0.9; }
+        .btn-info { background-color: #17a2b8; }
+        .btn-info:hover { background-color: #117a8b; opacity:0.9; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #545b62; opacity:0.9; }
+        
+        /* Para el mensaje cuando no hay restaurantes */
+        .alert-info-custom {
+            background-color: #333; 
+            color: #fff; 
+            padding: 15px; 
+            border-left: 5px solid #17a2b8; /* Color de 'info' */
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    <h1>Panel de Control del Restaurante</h1>
+
+    {# Bloque para mostrar mensajes flash #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set border_color = '#00D9C0' %} {# Default color para 'info' u otros #}
+                {% if category == 'danger' %}{% set border_color = '#dc3545' %}{% endif %}
+                {% if category == 'success' %}{% set border_color = '#28a745' %}{% endif %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if restaurants %}
+        <p class="lead">Gestiona tus establecimientos desde aquí.</p>
+        {% for restaurant in restaurants %} {# Si un dueño puede tener varios restaurantes #}
+        <div class="card mb-4"> {# mb-4 es una clase de Bootstrap para margin-bottom, ajusta si no usas Bootstrap #}
+            <h2><i class="fas fa-store" style="margin-right: 8px;"></i>{{ restaurant.name }}</h2>
+            {% if restaurant.description %}
+                <p>{{ restaurant.description }}</p>
+            {% endif %}
+            <p><strong>Dirección:</strong> {{ restaurant.address | default('No especificada.') }}</p>
+            <p><strong>Teléfono:</strong> {{ restaurant.phone_number | default('No especificado.') }}</p>
+            <p><strong>Estado:</strong> 
+                <span >
+                    {% if restaurant.is_active %}Activo{% else %}Inactivo{% endif %}
+                </span>
+            </p>
+            <hr style="border-color: #444; margin-top: 15px; margin-bottom: 15px;">
+            <h4>Acciones para {{ restaurant.name }}:</h4>
+            <p>
+                <a href="{{ url_for('restaurant.manage_menu', restaurant_id=restaurant.id) }}" class="btn btn-primary"><i class="fas fa-utensils" style="margin-right: 5px;"></i>Gestionar Menú</a>
+                <a href="{{ url_for('restaurant.view_restaurant_orders', restaurant_id=restaurant.id) }}" class="btn btn-info"><i class="fas fa-receipt" style="margin-right: 5px;"></i>Ver Pedidos</a>
+                <a href="{{ url_for('restaurant.edit_restaurant_info', restaurant_id=restaurant.id) }}" class="btn btn-secondary"><i class="fas fa-edit" style="margin-right: 5px;"></i>Editar Información</a>
+            </p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert-info-custom" role="alert">
+            Actualmente no gestionas ningún restaurante en la plataforma. Si crees que esto es un error, contacta al administrador.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

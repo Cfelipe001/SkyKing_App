@@ -1,0 +1,110 @@
+# ======================================
+# SKYKING - ARCHIVOS A IGNORAR EN GIT
+# ======================================
+
+# Variables de entorno (CRÍTICO - NUNCA SUBIR)
+.env
+.env.local
+.env.*.local
+
+# Entornos virtuales de Python
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Caché de pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Flask
+instance/
+.webassets-cache
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+*.sql.backup
+
+# Logs
+*.log
+logs/
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Archivos de Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Archivos subidos por usuarios (opcional, ajusta según necesites)
+static/uploads/menu_item_images/*
+static/uploads/user_avatars/*
+static/uploads/restaurant_logos/*
+static/uploads/profile_pics/*
+# Mantén una carpeta vacía con .gitkeep si es necesario
+!static/uploads/*/.gitkeep
+
+# Backups
+*.bak
+*.backup
+backup/
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Configuraciones locales específicas
+config.local.py
+local_settings.py
+
+# Certificados SSL (si los usas localmente)
+*.pem
+*.key
+*.crt
+
+# Node modules (si usas Node para alguna herramienta frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentación generada
+docs/_build/

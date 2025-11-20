@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Gestionar Menú de {{ restaurant.name }} - Skyking{% endblock %}
+
+{% block content %}
+<div class="container page-padding">
+    {# Botón para volver al dashboard del restaurante, asumiendo que la ruta se llama 'dashboard' en el blueprint 'restaurant' #}
+    <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-secondary mb-3" style="color:#00D9C0; border-color:#00D9C0; text-decoration: none; display: inline-block; padding: 8px 15px; margin-bottom:20px;">&laquo; Volver al Panel</a>
+    
+    <h1>Gestionar Menú de: {{ restaurant.name }}</h1>
+
+    {# Bloque para mostrar mensajes flash con el color del borde condicional manejado por una variable #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {# Determinar el color del borde en una variable #}
+                {% set border_color = '#00D9C0' %} {# Color por defecto (tu acento para 'info' u otros) #}
+                {% if category == 'danger' %}
+                    {% set border_color = '#dc3545' %} {# Rojo #}
+                {% elif category == 'success' %}
+                    {% set border_color = '#28a745' %} {# Verde #}
+                {% endif %}
+
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert" 
+                     style="background-color: #333; color: #fff; padding: 10px; margin-bottom:10px; border-left: 5px solid ;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="mb-3 text-right" style="margin-bottom: 20px; text-align: right;">
+        {# Este enlace apuntará a la ruta para añadir un nuevo ítem. Usaremos un placeholder por ahora. #}
+        {# Cuando crees la ruta, será algo como: href="{{ url_for('restaurant.add_menu_item', restaurant_id=restaurant.id) }}" #}
+        <a href="{{ url_for('restaurant.add_new_menu_item_for_restaurant', restaurant_id=restaurant.id) }}" class="btn btn-success-custom" style="background-color: #28a745; color:white; border:none; text-decoration: none; padding: 10px 20px; border-radius: 20px; font-weight: 500;">
+            <i class="fas fa-plus-circle"></i> Añadir Nuevo Ítem al Menú
+        </a>
+    </div>
+
+    {% if menu_items %}
+        <div class="card" style="background-color: #1E1E1E; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #E0E0E0; font-size: 1.8em; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">Ítems del Menú</h2>
+            <table class="table" style="color: #E0E0E0; width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left;">
+                        <th style="padding: 12px; border-bottom: 2px solid #555; color: #00D9C0;">Nombre del Ítem</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #555; color: #00D9C0;">Descripción</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #555; color: #00D9C0;">Precio</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #555; color: #00D9C0;">Disponible</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #555; color: #00D9C0;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in menu_items %}
+                    <tr style="border-top: 1px solid #444;">
+                         <td style="padding: 12px; width: 100px;"> {# --- NUEVA CELDA PARA LA IMAGEN #}
+                        {% if item.image_url %}
+                            <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.name }}" style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/placeholder_menu_item.jpg') }}" alt="Sin imagen" style="max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; opacity: 0.5;">
+                        {% endif %}
+                        </td>
+                        <td style="padding: 12px;">{{ item.name }}</td>
+                        <td style="padding: 12px;">{{ item.description | truncate(70, true) | default('N/A') }}</td>
+                        <td style="padding: 12px;">${{ "{:,.2f}".format(item.price) }}</td>
+                        <td style="padding: 12px;">
+                            {% if item.is_available %}
+                                <span style="color: #28a745; font-weight:bold;">Sí</span>
+                            {% else %}
+                                <span style="color: #dc3545;">No</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px; white-space: nowrap;">
+                            {# Enlaces para editar y eliminar (rutas a crear después) #}
+                            {# Ej: href="{{ url_for('restaurant.edit_menu_item', item_id=item.id) }}" #}
+                            <a href="{{ url_for('restaurant.edit_menu_item_for_restaurant', restaurant_id=restaurant.id, item_id=item.id) }}" class="btn btn-sm btn-secondary-custom" style="margin-right: 5px; background-color: #5A5A5A; color:white; text-decoration:none; padding: 5px 10px; border-radius:15px; font-size:0.85em;">Editar</a>
+                            
+                            {# Formulario para el botón de eliminar para que sea un POST #}
+                            {# Ej: action="{{ url_for('restaurant.delete_menu_item', item_id=item.id) }}" #}
+                            <form action="{{ url_for('restaurant.delete_menu_item_for_restaurant', restaurant_id=restaurant.id, item_id=item.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" style="background-color: #dc3545; color:white; border:none; padding: 5px 10px; border-radius:15px; font-size:0.85em; cursor:pointer;" 
+                                        onclick="return confirm('¿Estás seguro de que quieres eliminar este ítem: \'{{ item.name }}\'?');">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert" style="background-color: #333; color: #fff; padding: 15px; border-left: 5px solid #17a2b8; border-radius: 4px;">
+            Aún no hay ítems en el menú para este restaurante. ¡Empieza añadiendo algunos utilizando el botón de arriba!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
