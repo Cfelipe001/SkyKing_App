@@ -70,7 +70,7 @@
 
 ---
 
-## 🚀 Instalación y Configuración
+## Instalación y Configuración
 
 ### Prerrequisitos
 
@@ -170,29 +170,29 @@ El sistema soporta múltiples roles:
 
 ---
 
-## 🔑 Funcionalidades Principales
+##  Funcionalidades Principales
 
 ### Para Clientes
-- ✅ Registro e inicio de sesión
-- ✅ Realizar pedidos de productos
-- ✅ Seguimiento en tiempo real con mapa
-- ✅ Historial de pedidos
-- ✅ Sistema de puntos
-- ✅ Notificaciones de estado
+-  Registro e inicio de sesión
+-  Realizar pedidos de productos
+-  Seguimiento en tiempo real con mapa
+-  Historial de pedidos
+-  Sistema de puntos
+-  Notificaciones de estado
 
 ### Para Operadores
-- ✅ Dashboard de monitoreo de drones
-- ✅ Visualización de telemetría en tiempo real
-- ✅ Gestión de alertas
-- ✅ Asignación de rutas
-- ✅ Reportes de rendimiento
+-  Dashboard de monitoreo de drones
+-  Visualización de telemetría en tiempo real
+-  Gestión de alertas
+-  Asignación de rutas
+-  Reportes de rendimiento
 
 ### Para Administradores
-- ✅ Gestión de usuarios y permisos
-- ✅ Administración de flotas de drones
-- ✅ Configuración de zonas de cobertura
-- ✅ Reportes estadísticos
-- ✅ Gestión de aliados comerciales
+-  Gestión de usuarios y permisos
+-  Administración de flotas de drones
+-  Configuración de zonas de cobertura
+-  Reportes estadísticos
+-  Gestión de aliados comerciales
 
 ---
 
