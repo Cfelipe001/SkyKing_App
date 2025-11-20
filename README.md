@@ -1,11 +1,11 @@
-# 🚁 SkyKing - Sistema de Entregas con Drones Autónomos
+# SkyKing - Sistema de Entregas con Drones Autónomos
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## 📋 Descripción
+## Descripción
 
 **SkyKing** es un sistema innovador de entregas a domicilio que utiliza **drones autónomos** para realizar envíos rápidos, seguros y eficientes en zonas urbanas. El sistema integra:
 
@@ -19,7 +19,7 @@
 
 ---
 
-## 👥 Equipo de Desarrollo
+## Equipo de Desarrollo
 
 **Proyecto de Ingeniería del Software II**
 
@@ -30,7 +30,7 @@
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+##  Arquitectura del Sistema
 
 ### Stack Tecnológico
 
@@ -156,51 +156,6 @@ La aplicación estará disponible en: **http://localhost:5000**
 
 ---
 
-## 📁 Estructura del Proyecto
-
-```
-SkyKing_Web/
-│
-├── app/                           # Aplicación principal
-│   ├── __init__.py               # Factory de la aplicación
-│   ├── controllers/              # Controladores (routes)
-│   ├── utils/                    # Utilidades y servicios
-│   └── config/                   # Configuraciones
-│
-├── templates/                    # Templates HTML (Jinja2)
-│   ├── base.html
-│   ├── admin/
-│   ├── delivery/
-│   └── ...
-│
-├── static/                       # Recursos estáticos
-│   ├── css/
-│   ├── js/
-│   ├── images/
-│   └── uploads/
-│
-├── tests/                        # Pruebas unitarias
-│   ├── unit/
-│   └── integration/
-│
-├── docs/                         # Documentación
-│   ├── diagramas/
-│   ├── manuales/
-│   └── arquitectura/
-│
-├── .github/                      # CI/CD
-│   └── workflows/
-│
-├── run.py                        # Punto de entrada
-├── requirements.txt              # Dependencias
-├── README.md                     # Este archivo
-├── LICENSE                       # Licencia
-├── .env.example                  # Plantilla de configuración
-└── .gitignore                    # Archivos ignorados
-```
-
----
-
 ## 👤 Roles de Usuario
 
 El sistema soporta múltiples roles:
@@ -241,7 +196,7 @@ El sistema soporta múltiples roles:
 
 ---
 
-## 🧪 Pruebas
+## Pruebas
 
 ### Ejecutar Tests
 
@@ -269,7 +224,7 @@ pytest --cov=app tests/
 
 ---
 
-## 🚀 Despliegue
+## Despliegue
 
 ### Desarrollo
 
@@ -293,37 +248,37 @@ gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 "app:create_app()"
 
 ---
 
-## 📊 Telemetría y Monitoreo
+## Telemetría y Monitoreo
 
 El sistema recopila las siguientes métricas de cada dron:
 
-- 📏 Altura de vuelo
-- 🔋 Nivel de batería
-- ⚡ RPM de motores
-- 🚀 Velocidad y aceleración
-- 🌡️ Temperatura de motores
-- 📍 Ubicación GPS en tiempo real
+-  Altura de vuelo
+-  Nivel de batería
+-  RPM de motores
+-  Velocidad y aceleración
+-  Temperatura de motores
+-  Ubicación GPS en tiempo real
 
 ---
 
-## 🔐 Seguridad
+##  Seguridad
 
-- ✅ Contraseñas hasheadas con Werkzeug
-- ✅ Encriptación de datos sensibles con Fernet
-- ✅ Protección CORS configurada
-- ✅ Validación de datos en formularios
-- ✅ Sesiones seguras con Flask
-- ✅ Variables de entorno para secretos
+-  Contraseñas hasheadas con Werkzeug
+-  Encriptación de datos sensibles con Fernet
+-  Protección CORS configurada
+-  Validación de datos en formularios
+-  Sesiones seguras con Flask
+-  Variables de entorno para secretos
 
 ---
 
-## 📝 Licencia
+##  Licencia
 
 Este proyecto está licenciado bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-## 🤝 Contribuciones
+##  Contribuciones
 
 Este es un proyecto académico. Para sugerencias o mejoras:
 
@@ -335,16 +290,16 @@ Este es un proyecto académico. Para sugerencias o mejoras:
 
 ---
 
-## 📞 Contacto
+##  Contacto
 
 **Cristian Felipe Gómez Manrique**
 - Universidad Autónoma de Bucaramanga
 - Facultad de Ingeniería de Sistemas
-- Proyecto de Ingeniería del Software II - 2025
+- cgomez710@unab.edu.co
 
 ---
 
-## 📚 Referencias
+##  Referencias
 
 - [Flask Documentation](https://flask.palletsprojects.com/)
 - [Flask-SocketIO Documentation](https://flask-socketio.readthedocs.io/)
@@ -354,11 +309,10 @@ Este es un proyecto académico. Para sugerencias o mejoras:
 
 ---
 
-## 🙏 Agradecimientos
+##  Agradecimientos
 
 - Universidad Autónoma de Bucaramanga (UNAB)
 - Facultad de Ingeniería
-- Profesores del curso de Ingeniería del Software II
 - Comunidad de desarrollo open source
 
 ---
